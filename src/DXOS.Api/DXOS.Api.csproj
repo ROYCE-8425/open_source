@@ -1,15 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  <DisableFody>true</DisableFody>
-  </PropertyGroup>
-
   <ItemGroup>
-    
+    <ProjectReference Include="..\DXOS.Application\DXOS.Application.csproj" />
+    <ProjectReference Include="..\DXOS.Infrastructure\DXOS.Infrastructure.csproj" />
+    <ProjectReference Include="..\DXOS.Workflows\DXOS.Workflows.csproj" />
   </ItemGroup>
-
 </Project>
-
