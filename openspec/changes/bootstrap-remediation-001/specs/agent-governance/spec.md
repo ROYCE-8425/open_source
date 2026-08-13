@@ -28,7 +28,7 @@ Every implementation task in `tasks.md` MUST identify its Beads issue, and every
 - **AND** each remediation issue resolves to its authoritative task contract
 
 ### Requirement: Authority order is explicit
-Repository agent instructions SHALL enforce this precedence: current user instruction, accepted OpenSpec, accepted ADRs, business rules, Beads acceptance criteria, workspace rules, project skills, existing code patterns, and model assumptions.
+Repository agent instructions SHALL enforce this precedence: current user instruction, the DX-OS constitution, accepted OpenSpec, accepted ADRs, business rules, Beads acceptance criteria, workspace rules, project skills, existing code patterns, and model assumptions. The constitutional requirement that DX-OS itself is open source is non-negotiable and cannot be weakened by a lower-authority artifact.
 
 #### Scenario: Higher-authority sources conflict
 - **WHEN** two applicable higher-authority sources require incompatible behavior
@@ -74,3 +74,10 @@ No business feature spec or implementation SHALL begin until the follow-up boots
 - **WHEN** bootstrap has any required gate not passing
 - **THEN** the feature remains deferred and remediation continues
 
+### Requirement: OSS governance is durable project truth
+Agents MUST preserve the public-source ownership, OSS license, source reproducibility, dependency transparency, attribution, service disclosure, AI provider independence, truthful claims, competition evidence, and release blockers defined by the constitution and bootstrap change.
+
+#### Scenario: An implementation weakens OSS obligations
+- **WHEN** an agent proposes a private-source dependency, concealed reuse, vendor-locked domain contract, incomplete disclosure, or unsupported "100% open source" claim
+- **THEN** review returns `FIX_REQUIRED`
+- **AND** no Beads closure, OpenSpec completion, release, or READY transition is permitted

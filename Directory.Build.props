@@ -9,5 +9,6 @@
     <Authors>DX-OS Team</Authors>
     <Company>DX-OS</Company>
     <Product>DX-OS</Product>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
   </PropertyGroup>
 </Project>

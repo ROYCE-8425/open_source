@@ -78,3 +78,18 @@ Required services SHALL emit structured startup, health, database, and workflow 
 - **THEN** startup verification fails non-zero
 - **AND** the evidence identifies the resource and correlation data needed to diagnose it
 
+### Requirement: Third-party services are explicit and separable
+External services and proprietary APIs MUST be documented separately from OSS dependencies, including development AI tools, email/SMS providers, advertising APIs, cloud services, SaaS, and every proprietary API used by the demo. An undisclosed paid or proprietary service MUST NOT be a mandatory runtime dependency.
+
+#### Scenario: External service is introduced
+- **WHEN** a development, demo, or runtime path uses an external service
+- **THEN** the service, provider, purpose, data boundary, requirement level, cost/access assumption, and fallback are disclosed
+- **AND** the service is not misclassified as an open-source dependency
+
+### Requirement: AI integrations are provider-independent
+Domain and business modules MUST depend on a DX-OS-owned AI abstraction rather than a Gemini-, OpenAI-, or vendor-specific SDK. Where practical, adapters SHALL support Gemini, an OpenAI-compatible provider, a local/open-weight model, and future providers without rewriting business modules.
+
+#### Scenario: AI provider changes
+- **WHEN** an approved AI provider adapter is replaced or disabled
+- **THEN** domain behavior and business-module contracts remain unchanged
+- **AND** provider-specific configuration and SDK types remain outside the domain boundary

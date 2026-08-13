@@ -450,7 +450,7 @@ Make local and CI supply-chain/security/OSS claims executable, pinned, licensed,
 5. Create DX-OS CI that uses the current .NET pin, PostgreSQL/Docker prerequisites, same explicit gate contracts, separate result groups, bounded runtime, and uploaded evidence.
 6. Pin all third-party actions to full commit SHAs and annotate the intended version. Never use Trivy mutable tags/action refs or affected releases.
 7. Generate/review resolved dependency/license inventory. Update notices for only actual shipped packages/tools/copying, including MIT, Apache-2.0, and PostgreSQL obligations and any NOTICE content.
-8. Resolve the DX-OS source license with Product Owner authorization before public push; do not silently reuse Elsa authorship/license identity.
+8. Apply the Product Owner-approved Apache-2.0 DX-OS license decision, reconcile attribution/notices/SBOM/service disclosure, and never reuse Elsa authorship/license identity.
 
 **Verification**
 
