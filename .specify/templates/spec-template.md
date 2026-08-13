@@ -1,7 +1,7 @@
 # Feature Specification: [FEATURE NAME]
 
-**Created**: [DATE]  
-**Status**: Draft  
+**Created**: [DATE]\
+**Status**: Draft\
 **Input**: [request]
 
 ## User Scenarios and Testing

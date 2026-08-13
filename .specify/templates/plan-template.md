@@ -22,11 +22,11 @@ Any failed check MUST be resolved or documented as a release-blocking constituti
 
 ## Technical Context
 
-**Language/Version**: [value]  
-**Primary Dependencies**: [value]  
-**Storage**: [value or N/A]  
-**Testing**: [value]  
-**Target Platform**: [value]  
+**Language/Version**: [value]\
+**Primary Dependencies**: [value]\
+**Storage**: [value or N/A]\
+**Testing**: [value]\
+**Target Platform**: [value]\
 **Constraints**: [value]
 
 ## Project Structure
