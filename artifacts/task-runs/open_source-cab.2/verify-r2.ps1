@@ -472,57 +472,13 @@ $gitStatusLines = $gitStatus.Stdout -split "`n" | Where-Object { $_.Trim() }
 
 $expectedStatus = @(
     " M .beads/interactions.jsonl",
-    " M .gitignore",
-    " M DXOS.slnx",
-    " M openspec/changes/bootstrap-remediation-001/tasks.md",
-    " M scripts/check.ps1",
-    " M scripts/reset-demo.ps1",
-    " M scripts/seed-demo.ps1",
-    " M src/DXOS.Api/DXOS.Api.csproj",
-    " D src/DXOS.Api/FodyWeavers.xml",
-    " M src/DXOS.AppHost/DXOS.AppHost.csproj",
-    " D src/DXOS.AppHost/FodyWeavers.xml",
-    " D src/DXOS.AppHost/FodyWeavers.xsd",
-    " M src/DXOS.Application/DXOS.Application.csproj",
-    " D src/DXOS.Application/FodyWeavers.xml",
-    " D src/DXOS.Application/FodyWeavers.xsd",
-    " M src/DXOS.Domain/DXOS.Domain.csproj",
-    " D src/DXOS.Domain/FodyWeavers.xml",
-    " D src/DXOS.Domain/FodyWeavers.xsd",
-    " M src/DXOS.Infrastructure/DXOS.Infrastructure.csproj",
-    " D src/DXOS.Infrastructure/FodyWeavers.xml",
-    " D src/DXOS.Infrastructure/FodyWeavers.xsd",
-    " M src/DXOS.Workflows/DXOS.Workflows.csproj",
-    " D src/DXOS.Workflows/FodyWeavers.xml",
-    " D src/DXOS.Workflows/FodyWeavers.xsd",
-    " M tests/DXOS.Architecture.Tests/DXOS.Architecture.Tests.csproj",
-    " D tests/DXOS.Architecture.Tests/FodyWeavers.xml",
-    " M tests/DXOS.Architecture.Tests/UnitTest1.cs",
-    " D tests/DXOS.E2E.Tests/DXOS.E2E.Tests.csproj",
-    " D tests/DXOS.E2E.Tests/FodyWeavers.xml",
-    " D tests/DXOS.E2E.Tests/UnitTest1.cs",
-    " M tests/DXOS.Integration.Tests/DXOS.Integration.Tests.csproj",
-    " D tests/DXOS.Integration.Tests/FodyWeavers.xml",
-    " M tests/DXOS.Integration.Tests/UnitTest1.cs",
-    " M tests/DXOS.Unit.Tests/DXOS.Unit.Tests.csproj",
-    " D tests/DXOS.Unit.Tests/FodyWeavers.xml",
-    " M tests/DXOS.Unit.Tests/UnitTest1.cs",
-    "?? .editorconfig",
-    "?? Directory.Build.props",
-    "?? Directory.Build.targets",
-    "?? Directory.Packages.props",
-    "?? NuGet.Config",
-    "?? artifacts/task-runs/open_source-cab.2/",
-    "?? global.json",
-    "?? src/DXOS.Api/packages.lock.json",
-    "?? src/DXOS.AppHost/packages.lock.json",
-    "?? src/DXOS.Application/packages.lock.json",
-    "?? src/DXOS.Domain/packages.lock.json",
-    "?? src/DXOS.Infrastructure/packages.lock.json",
-    "?? src/DXOS.Workflows/packages.lock.json",
-    "?? tests/DXOS.Architecture.Tests/packages.lock.json",
-    "?? tests/DXOS.Integration.Tests/packages.lock.json",
-    "?? tests/DXOS.Unit.Tests/packages.lock.json"
+    " M artifacts/task-runs/open_source-cab.2/implementation-report.md",
+    " M artifacts/task-runs/open_source-cab.2/review.md",
+    " M artifacts/task-runs/open_source-cab.2/verification-output.sha256",
+    " M artifacts/task-runs/open_source-cab.2/verification-output.txt",
+    " M artifacts/task-runs/open_source-cab.2/verification.md",
+    " M artifacts/task-runs/open_source-cab.2/verify-r2.ps1",
+    " M openspec/changes/bootstrap-remediation-001/tasks.md"
 )
 
 $expectedCounts = @{}
@@ -583,7 +539,7 @@ $markerE220AC = [string][char]0x00E2 + [char]0x20AC
 $replacementMarker = [string][char]0xFFFD
 
 foreach ($f in $scanSet) {
-    if ($f -match "\\\.git\\" -or $f -match "\\bin\\" -or $f -match "\\obj\\" -or $f -match "\\\.beads\\" -or $f -match "verification-output\.txt" -or $f -match "verification-output\.sha256" -or $f -match "review\.md" -or $f -match "prompt\.md" -or $f -match "implementation-report\.md" -or $f -match "verification\.md") {
+    if ($f -match "\\\.git\\" -or $f -match "\\bin\\" -or $f -match "\\obj\\" -or $f -match "\\\.beads\\" -or $f -match "verification-output\.txt" -or $f -match "verification-output\.sha256" -or $f -match "review\.md" -or $f -match "prompt\.md") {
         continue
     }
     try {

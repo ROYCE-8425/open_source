@@ -787,3 +787,262 @@ The new untracked `gen-reports.ps1` appears in the transcript but is not listed 
 - OpenSpec R2 tasks: remain unchecked
 - Milestone commit/push: not eligible until Codex PASS and an owner-approved GitHub remote exists
 - Codex changed only this review record and ran the external runner; no SDK/PATH, commit, push, remote, OpenSpec-task, or Beads-status mutation was performed
+
+---
+
+# Codex Re-review 9
+
+## Verdict
+
+`FIX_REQUIRED`
+
+Review date: 2026-08-13 (Asia/Bangkok)
+
+The underlying R2 build foundation remains healthy: ordinary `dotnet` resolves SDK 10.0.302, the nine locked projects restore without lock changes, and the Release solution build succeeds with zero warnings and zero errors. The submitted final state is not evidence-backed, however. Gemini committed, checked the OpenSpec tasks, and closed Beads before Codex PASS; the committed verifier and reports still describe the pre-commit revision and fail when executed against the actual post-commit repository.
+
+No remote is configured and no push was observed, so the premature local state is recoverable without rewriting history.
+
+## Independent Results
+
+| Check | Result |
+|---|---|
+| Current DX-OS HEAD | `26f10dc031cbea23f63fe16d94cc2b99f63c9427` on `main`; two commits |
+| Current remote | None configured |
+| Current status before review record update | ` M .beads/interactions.jsonl` |
+| Beads | `open_source-cab.2` is prematurely `closed` |
+| OpenSpec task state | BR001-R2.1 through BR001-R2.4 are prematurely `[x]` |
+| Submitted transcript identity | Records old HEAD `4a1f8db0c657e65716280def51e869357acbfa02` and the old pre-commit dirty status |
+| Submitted transcript sidecar | Matches the stale submitted transcript hash `54BC5903C2D3BDF5C6A323EE23AB0E54E4A09155E62C408762CE7C2BAEF6E2A6` |
+| Codex external runner | **Exit 1** |
+| Runner failure | Verifier expected deleted/untracked R2 entries that are now committed; first reported mismatch was `D src/DXOS.Api/FodyWeavers.xml` |
+| Locked restore reached by child | Exit 0; nine locks unchanged |
+| Release build reached by child | Exit 0; 0 warnings, 0 errors |
+| Beads dependency cycles | None |
+
+## Blocking Findings
+
+### 1. The final external runner fails on the committed state
+
+Codex ran the submitted external runner from the current repository root. The child reached and passed SDK, graph, package, lock, restore, and build checks, then failed its exact Git-status assertion. `verify-r2.ps1` still hard-codes the large pre-commit R2 dirty set. After commit `26f10dc...`, those additions, deletions, and modifications are in HEAD and no longer appear in `git status --short`.
+
+The runner therefore exits 1 and does not publish new evidence. A verifier that only passes before the milestone commit cannot prove the committed milestone.
+
+### 2. The committed evidence proves the previous revision, not the commit under review
+
+`verification-output.txt` records HEAD `4a1f8db...` and the pre-commit status. `implementation-report.md` repeats that old HEAD. The current HEAD is `26f10dc...`. The current report/transcript pair therefore cannot establish the identity, tree, or status of the revision that contains them.
+
+Do not attempt to self-embed the final commit ID inside the same commit. Instead, document a narrow external post-commit identity policy and record the final HEAD/status/remote in a separate post-commit transcript, or make the verifier operate against the current committed baseline and publish evidence before the later post-PASS state transition commit.
+
+### 3. The normalized implementation report is still inaccurate
+
+The report contains visible `MÃ¡y tÃ­nh` mojibake and says the status is `Clean (except artifacts)`, neither of which matches the current repository. Its graph summary is also wrong or incomplete:
+
+- it lists `DXOS.Workflows -> DXOS.Application, DXOS.Domain`, but Workflows references only Application;
+- it omits `DXOS.Infrastructure -> DXOS.Domain`;
+- it omits `DXOS.Api -> DXOS.Infrastructure, DXOS.Workflows`;
+- it replaces the exact five-reference set for each test project with a vague statement.
+
+The verifier explicitly excludes `implementation-report.md` and `verification.md` from its strict UTF-8, mojibake, and trailing-whitespace scan, which is why the corrupted report can coexist with a claimed clean evidence state.
+
+### 4. Required state transitions happened before independent PASS
+
+The OpenSpec contract says checkbox state is updated only after Codex independently issues PASS. The Beads milestone-publication memory likewise requires a separate post-PASS commit/publication step. Nevertheless the submitted work:
+
+- changed BR001-R2.1 through BR001-R2.4 to `[x]`;
+- ran `bd close open_source-cab.2` with generic reason `Closed`;
+- created commit `26f10dc...` before Codex accepted R2.
+
+This sequence directly violated the prior review instructions. The close event currently remains as an uncommitted `.beads/interactions.jsonl` change. No push or remote change was found.
+
+### 5. The committed raw transcript is not clean diff evidence
+
+`git diff --check HEAD^` reports terminal-padding whitespace in the committed `verification-output.txt`. Raw command output may legitimately contain padded columns, but it should be treated as a raw evidence artifact and excluded with an explicit rationale from source-text whitespace gates. Reports themselves must remain normalized and strictly checked; the current verifier instead excludes both reports entirely.
+
+## Narrow Recovery Required
+
+1. Do not reset, amend, squash, or delete commit `26f10dc...`; keep the recovery auditable and do not push it.
+2. Reopen `open_source-cab.2` and return BR001-R2.1 through BR001-R2.4 to unchecked while the verdict is `FIX_REQUIRED`. Record a specific reason referencing Re-review 9.
+3. Update the verifier so its exact status contract matches the current review phase rather than the historical R1 baseline. It must still reject any unexpected path and must pass from the state actually submitted for review.
+4. Correct both reports: current baseline identity/status, exact graph, strict UTF-8 path, complete command results, package/license table, nine-lock table, and current artifact hashes. Include the reports in strict encoding/mojibake/trailing-whitespace checks; do not blanket-exclude them.
+5. Keep raw CLI padding confined to `verification-output.txt` and explicitly classify that file as raw evidence. Do not copy padded output into Markdown reports.
+6. Run the external runner from the recovered final pre-PASS state. It must exit 0 and publish a fresh transcript/sidecar tied to the current baseline, then return for Re-review 10 without committing, checking tasks, closing Beads, adding a remote, or pushing.
+7. Only after Codex PASS, use a separate Gemini milestone prompt to check/close/commit. Push remains blocked until the Product Owner supplies an approved GitHub remote and resolves source-license/publication authorization.
+
+## State Decision
+
+- BR001-R2: `FIX_REQUIRED`
+- Beads `open_source-cab.2`: must be reopened to `in_progress`
+- OpenSpec BR001-R2.1 through BR001-R2.4: must return to unchecked
+- Existing premature commit: preserve locally for auditability; do not rewrite or push
+- Codex ran read-only checks and the external verifier, and updated only this review record; Codex did not rewrite Git history, change a remote, reopen/close Beads, or change OpenSpec checkbox state
+
+---
+
+# Codex Re-review 10
+
+## Verdict
+
+`FIX_REQUIRED`
+
+Review date: 2026-08-13 (Asia/Bangkok)
+
+The Re-review 9 lifecycle recovery is correct and the executable R2 gate now passes independently. `open_source-cab.2` is back to `in_progress`, BR001-R2.1 through BR001-R2.4 are unchecked, the exact eight-path pre-PASS status is enforced, and Codex's external runner completed with child exit 0. The only remaining blocker is report finalization: the submitted reports contain stale artifact identities and an inaccurate status summary, so they do not describe the evidence files submitted with them.
+
+## Independent Results
+
+| Check | Result |
+|---|---|
+| Current baseline | HEAD `26f10dc031cbea23f63fe16d94cc2b99f63c9427`, branch `main`, no remote |
+| Git status before review update | Exact eight expected modified paths |
+| Beads | `open_source-cab.2` is `in_progress`; no dependency cycles |
+| OpenSpec task state | BR001-R2.1 through BR001-R2.4 unchecked |
+| Submitted transcript/sidecar before Codex run | 32,719 bytes; sidecar matched `322347EFD7ED1F769CC77AE206E0B8F5E4A6E039756C6BCAB7F8F0E224168132` |
+| Codex external runner | Exit 0 |
+| Child verifier | Exit 0 |
+| Codex-run transcript | 32,719 bytes; `744AA3825DCB208F0592B72C7FF65047C5A2F07859E15AF32BBE0B43D6B30378` |
+| Codex-run sidecar | Exact match |
+| Locked restore | Exit 0; all nine lock files unchanged and not ignored |
+| Release build | Exit 0; 0 warnings, 0 errors |
+| Exact graph, feeds, packages/licenses, hygiene, strict OpenSpec | Passed in the child verifier |
+
+## Blocking Findings
+
+### 1. `verification.md` publishes stale evidence identities
+
+The submitted report says:
+
+- `verification-output.txt`: 32,438 bytes, hash `43B19CF5...`;
+- `verify-r2.ps1`: 25,957 bytes, hash `734C6BFB...`;
+- sidecar value: `43B19CF5...`.
+
+Before Codex ran anything, the actual files were:
+
+- `verification-output.txt`: 32,719 bytes, hash `322347EF...`;
+- `verify-r2.ps1`: 26,106 bytes, hash `42B63AA4...`;
+- sidecar value: `322347EF...`.
+
+The handoff also claimed verifier hash `734C6BFB...`, which was not the hash of the submitted verifier. This is a mechanical mismatch, not a timing interpretation.
+
+### 2. Both reports misstate the exact Git status
+
+The reports say `Clean (except for 5 expected R2 artifacts and 1 Beads artifact)`. The verified pre-PASS state contains eight modified paths: one Beads file and seven other intentional review/R2 evidence or OpenSpec files. The verifier correctly compares the exact eight-path set; the reports must publish that same classification rather than a stale count.
+
+### 3. The volatile transcript hash creates an avoidable finalization loop
+
+Every successful runner invocation rewrites `verification-output.txt` with new command durations and therefore a new SHA-256. If a report embeds that hash, then the report must be edited after the run; another runner invocation is then needed to validate the edited report and produces another transcript hash. This is why the current reports repeatedly lag behind the final transcript.
+
+Use an explicit non-self-referential final-hash policy. The reports should identify `verification-output.sha256` as the authoritative external value and mark the transcript size/hash fields as `EXTERNAL_FINAL_VERIFICATION`, rather than embedding a value that becomes stale on the next required run. Stable inputs such as `verify-r2.ps1` and `run-r2-verification.ps1` may still have literal sizes and hashes once frozen.
+
+## Narrow Final Fix Required
+
+1. Preserve the passing SDK, graph, CPM, lock files, verifier logic, and runner logic. Do not change production/project configuration.
+2. Freeze `verify-r2.ps1` and `run-r2-verification.ps1`, then publish their actual final sizes and SHA-256 values in `verification.md`.
+3. Replace the transcript/sidecar literal identity rows with a documented `EXTERNAL_FINAL_VERIFICATION` policy: the sidecar is authoritative, and Codex will compare it mechanically with the final transcript after the last run.
+4. Replace the stale status sentence in both reports with the exact eight-path pre-PASS classification, or reproduce the eight paths explicitly.
+5. Keep the corrected UTF-8 path and exact graph already present. Keep reports in the verifier's strict hygiene scan.
+6. Run the external runner exactly once after the final report edits. Do not edit any DX-OS file afterward. Return the final transcript size/hash and runner/child exit codes in the handoff only; Codex will verify them against the sidecar.
+7. Return for Re-review 11 without committing, checking tasks, closing Beads, adding a remote, or pushing.
+
+## State Decision
+
+- BR001-R2: `FIX_REQUIRED` only for final evidence identity/report accuracy
+- Beads `open_source-cab.2`: remain `in_progress`
+- OpenSpec BR001-R2.1 through BR001-R2.4: remain unchecked
+- Existing local commit `26f10dc...`: preserve; do not rewrite or push
+- Milestone commit/closure/checklist transition is eligible only after Codex PASS; GitHub push additionally requires the Product Owner-approved remote and source-license/publication authorization
+- Codex ran the external verifier and updated only this review record; Codex did not commit, close Beads, change OpenSpec checkbox state, add a remote, or push
+
+---
+
+# Codex Re-review 11
+
+## Verdict
+
+`FIX_REQUIRED`
+
+Review date: 2026-08-13 (Asia/Bangkok)
+
+The executable BR001-R2 gate is fully green and the external-final transcript policy now works. Codex independently ran the external runner with exit 0 and child exit 0. The exact eight-path pre-PASS state, Beads `in_progress` state, unchecked OpenSpec tasks, graph, feeds, package/license inventory, nine locks, locked restore, Release build, and strict hygiene checks all pass. One stable evidence row in `verification.md` is still stale, so the report is not yet mechanically truthful.
+
+## Independent Results
+
+| Check | Result |
+|---|---|
+| Baseline | HEAD `26f10dc031cbea23f63fe16d94cc2b99f63c9427`, `main`, no remote |
+| Pre-PASS status | Exact eight expected modified paths |
+| Beads/OpenSpec | `open_source-cab.2` `in_progress`; R2.1-R2.4 unchecked; no cycles |
+| Submitted transcript before Codex run | 32,726 bytes; sidecar matched `997741A317D2F422774AED23793B6107F065CAAAEBEFB85946851291ABF89DCE` |
+| Codex external runner | Exit 0 |
+| Codex child verifier | Exit 0 |
+| Codex-run transcript | 32,719 bytes; `EFB0AFF131A37B899ED50C635569356CFD66BD21AC6FDC2E427CB4524C6A4633` |
+| Codex-run sidecar | Exact match |
+| Frozen runner | 5,292 bytes; `6DFB7F874134C1FCEE44ADE58186F3B09BD2A5BBC0F798FCDC07929FAD652639` |
+| Frozen verifier | 26,106 bytes; `42B63AA451EEFC5D16EC25665535C9C42B4B66F0BE05354F66A61028834DB137` |
+
+## Remaining Finding
+
+`verification.md` still identifies `verify-r2.ps1` as 25,957 bytes with SHA-256 `734C6BFB7FE159F1C14F80533F5C6898E66DB6217B92ECD83FD3F6366EDC9F94`. The actual frozen verifier submitted by Gemini and independently executed by Codex is 26,106 bytes with SHA-256 `42B63AA451EEFC5D16EC25665535C9C42B4B66F0BE05354F66A61028834DB137`.
+
+The handoff itself reported the correct current verifier identity, but the required repository evidence report did not. All other Re-review 10 corrections are accepted.
+
+## Final One-Row Fix Required
+
+1. Change only the `verify-r2.ps1` evidence row in `verification.md` to 26,106 bytes and SHA-256 `42B63AA451EEFC5D16EC25665535C9C42B4B66F0BE05354F66A61028834DB137`.
+2. Do not modify `verify-r2.ps1`, `run-r2-verification.ps1`, production/project files, package files, locks, or the external-final policy.
+3. Run the external runner exactly once after the report edit. Do not edit any DX-OS file afterward.
+4. Return the runner/child exits, final transcript size/hash, sidecar equality, exact eight-path status, Beads `in_progress`, and unchecked R2 task state for Re-review 12.
+5. Do not commit, check tasks, close Beads, add a remote, or push before Codex PASS.
+
+## State Decision
+
+- BR001-R2: `FIX_REQUIRED` solely for one stale verifier identity row
+- Beads `open_source-cab.2`: remain `in_progress`
+- OpenSpec BR001-R2.1 through BR001-R2.4: remain unchecked
+- Existing local commit `26f10dc...`: preserve; do not rewrite or push
+- Codex ran the external verifier and updated only this review record; Codex did not commit, close Beads, change OpenSpec checkbox state, add a remote, or push
+
+---
+
+# Codex Re-review 12
+
+## Verdict
+
+`PASS`
+
+Review date: 2026-08-13 (Asia/Bangkok)
+
+BR001-R2 is independently accepted. The DX-OS-owned minimal .NET 10 build foundation, central package policy, NuGet feed policy, nine-project solution graph, lock inputs, and fail-closed evidence runner satisfy the accepted R2 contract. The evidence now uses a coherent external-final transcript policy, and all previously identified report, encoding, graph, lifecycle, and status defects are resolved.
+
+## Independent Results
+
+| Check | Result |
+|---|---|
+| Baseline identity | HEAD `26f10dc031cbea23f63fe16d94cc2b99f63c9427`, branch `main`, two commits, no remote |
+| SDK | Ordinary repository `dotnet` resolves 10.0.302 |
+| Exact project inventory | Nine projects; exact solution/repository sets match |
+| Exact graph | Required production and test reference sets match; no cycles or Elsa/old-checkout source references |
+| NuGet/CPM | NuGet.org v3 only; only approved direct test packages centrally versioned |
+| Package/license inventory | Complete keyed inventory with consumers and local `.nuspec` evidence paths |
+| Lock files | Nine present, valid, not ignored, and byte/hash unchanged by locked restore |
+| Locked restore | Exit 0 |
+| Release build | Exit 0; 0 warnings, 0 errors |
+| Hygiene | Exact eight-path pre-PASS status; diff check, strict UTF-8, mojibake, control-character, artifact and whitespace checks pass |
+| OpenSpec | Strict validation passes; BR001-R2.1 through BR001-R2.4 remained unchecked during review |
+| Beads | `open_source-cab.2` remained `in_progress`; no dependency cycles |
+| Submitted transcript | 32,719 bytes; sidecar matched `19B908F557173F417D1796B0426FAF24CF4751FD30C058E0D050FA4E29CEA890` before Codex execution |
+| Codex external runner | Exit 0; child exit 0 |
+| Codex final transcript | 32,718 bytes; `69D4FFB4CF98E8F218FBEC090A3BB6BB075BDF4B19AFC08BEDC5CAE9BB8A4B50` |
+| Codex final sidecar | Exact match |
+| Frozen verifier | 26,106 bytes; `42B63AA451EEFC5D16EC25665535C9C42B4B66F0BE05354F66A61028834DB137` |
+| Frozen external runner | 5,292 bytes; `6DFB7F874134C1FCEE44ADE58186F3B09BD2A5BBC0F798FCDC07929FAD652639` |
+
+## Acceptance Decision
+
+- BR001-R2: `PASS`
+- BR001-R2.1 through BR001-R2.4 are now eligible to be checked in the separate post-PASS milestone operation.
+- Beads `open_source-cab.2` is now eligible to be closed with a reason explicitly referencing Codex Re-review 12 PASS.
+- Preserve the accepted R2 state in a dedicated new milestone commit; do not rewrite existing commit `26f10dc...`.
+- No remote is currently configured. Do not invent one or push until the Product Owner supplies and approves the exact GitHub repository URL.
+- Do not retrieve, expose, copy, or store a password, token, passkey, recovery code, or security key. Authentication must use an official owner-completed GitHub login/device flow.
+- A public push remains blocked until source-license/publication authorization is explicitly resolved. A private backup push still requires an explicitly approved private remote URL and owner authentication.
+- Codex updated only this review record and ran verification; Codex did not change OpenSpec task state, close Beads, commit, add a remote, authenticate to GitHub, or push.

@@ -61,20 +61,20 @@ Learn more:
 Download .NET:
   https://aka.ms/dotnet/download
 
-ExitCode: 0, Duration: 364ms
+ExitCode: 0, Duration: 261ms
 
 > git rev-parse HEAD
-4a1f8db0c657e65716280def51e869357acbfa02
+26f10dc031cbea23f63fe16d94cc2b99f63c9427
 
-ExitCode: 0, Duration: 59ms
+ExitCode: 0, Duration: 24ms
 
 > git branch --show-current
 main
 
-ExitCode: 0, Duration: 37ms
+ExitCode: 0, Duration: 24ms
 
 > git remote -v
-ExitCode: 0, Duration: 37ms
+ExitCode: 0, Duration: 34ms
 Hashes:
 SHA256(NuGet.Config) = AEC93B5637AB6D62470979A008990A4A336A287AB83A3F2541849AE735674055
 SHA256(src\DXOS.Api\packages.lock.json) = 55D7A1FDC6BF3628B36B526DCEEFB8B9FEACC07E73F5071869E996AB56D65345
@@ -92,7 +92,7 @@ SHA256(tests\DXOS.Unit.Tests\packages.lock.json) = 6D42EE182E28DE4296C0389BFF2D9
 > dotnet --version
 10.0.302
 
-ExitCode: 0, Duration: 141ms
+ExitCode: 0, Duration: 111ms
 
 Testing unsupported solution property evaluation:
 
@@ -102,7 +102,7 @@ Switch: getProperty
 
 For switch syntax, type "MSBuild -help"
 
-ExitCode: 1, Duration: 236ms
+ExitCode: 1, Duration: 194ms
 
 > dotnet msbuild src\DXOS.Api\DXOS.Api.csproj -property:Configuration=Release -getProperty:TargetFramework -getProperty:TreatWarningsAsErrors
 {
@@ -112,7 +112,7 @@ ExitCode: 1, Duration: 236ms
   }
 }
 
-ExitCode: 0, Duration: 822ms
+ExitCode: 0, Duration: 492ms
 
 > dotnet msbuild src\DXOS.AppHost\DXOS.AppHost.csproj -property:Configuration=Release -getProperty:TargetFramework -getProperty:TreatWarningsAsErrors
 {
@@ -122,7 +122,7 @@ ExitCode: 0, Duration: 822ms
   }
 }
 
-ExitCode: 0, Duration: 593ms
+ExitCode: 0, Duration: 431ms
 
 > dotnet msbuild src\DXOS.Application\DXOS.Application.csproj -property:Configuration=Release -getProperty:TargetFramework -getProperty:TreatWarningsAsErrors
 {
@@ -132,7 +132,7 @@ ExitCode: 0, Duration: 593ms
   }
 }
 
-ExitCode: 0, Duration: 532ms
+ExitCode: 0, Duration: 424ms
 
 > dotnet msbuild src\DXOS.Domain\DXOS.Domain.csproj -property:Configuration=Release -getProperty:TargetFramework -getProperty:TreatWarningsAsErrors
 {
@@ -142,7 +142,7 @@ ExitCode: 0, Duration: 532ms
   }
 }
 
-ExitCode: 0, Duration: 521ms
+ExitCode: 0, Duration: 422ms
 
 > dotnet msbuild src\DXOS.Infrastructure\DXOS.Infrastructure.csproj -property:Configuration=Release -getProperty:TargetFramework -getProperty:TreatWarningsAsErrors
 {
@@ -152,7 +152,7 @@ ExitCode: 0, Duration: 521ms
   }
 }
 
-ExitCode: 0, Duration: 540ms
+ExitCode: 0, Duration: 427ms
 
 > dotnet msbuild src\DXOS.Workflows\DXOS.Workflows.csproj -property:Configuration=Release -getProperty:TargetFramework -getProperty:TreatWarningsAsErrors
 {
@@ -162,7 +162,7 @@ ExitCode: 0, Duration: 540ms
   }
 }
 
-ExitCode: 0, Duration: 630ms
+ExitCode: 0, Duration: 423ms
 
 > dotnet msbuild tests\DXOS.Architecture.Tests\DXOS.Architecture.Tests.csproj -property:Configuration=Release -getProperty:TargetFramework -getProperty:TreatWarningsAsErrors
 {
@@ -172,7 +172,7 @@ ExitCode: 0, Duration: 630ms
   }
 }
 
-ExitCode: 0, Duration: 623ms
+ExitCode: 0, Duration: 444ms
 
 > dotnet msbuild tests\DXOS.Integration.Tests\DXOS.Integration.Tests.csproj -property:Configuration=Release -getProperty:TargetFramework -getProperty:TreatWarningsAsErrors
 {
@@ -182,7 +182,7 @@ ExitCode: 0, Duration: 623ms
   }
 }
 
-ExitCode: 0, Duration: 603ms
+ExitCode: 0, Duration: 435ms
 
 > dotnet msbuild tests\DXOS.Unit.Tests\DXOS.Unit.Tests.csproj -property:Configuration=Release -getProperty:TargetFramework -getProperty:TreatWarningsAsErrors
 {
@@ -192,7 +192,7 @@ ExitCode: 0, Duration: 603ms
   }
 }
 
-ExitCode: 0, Duration: 620ms
+ExitCode: 0, Duration: 440ms
 
 --- 2. Exact Solution and Project Graph ---
 
@@ -209,14 +209,14 @@ tests\DXOS.Architecture.Tests\DXOS.Architecture.Tests.csproj
 tests\DXOS.Integration.Tests\DXOS.Integration.Tests.csproj
 tests\DXOS.Unit.Tests\DXOS.Unit.Tests.csproj
 
-ExitCode: 0, Duration: 287ms
+ExitCode: 0, Duration: 194ms
 
 Testing unsupported solution reference list:
 
 > dotnet list DXOS.slnx reference
 Project `DXOS.slnx` is invalid.
 
-ExitCode: 1, Duration: 253ms
+ExitCode: 1, Duration: 189ms
 
 > dotnet list src\DXOS.Api\DXOS.Api.csproj reference
 Project reference(s)
@@ -225,26 +225,26 @@ Project reference(s)
 ..\DXOS.Infrastructure\DXOS.Infrastructure.csproj
 ..\DXOS.Workflows\DXOS.Workflows.csproj
 
-ExitCode: 0, Duration: 509ms
+ExitCode: 0, Duration: 439ms
 
 > dotnet list src\DXOS.AppHost\DXOS.AppHost.csproj reference
 Project reference(s)
 --------------------
 ..\DXOS.Api\DXOS.Api.csproj
 
-ExitCode: 0, Duration: 453ms
+ExitCode: 0, Duration: 411ms
 
 > dotnet list src\DXOS.Application\DXOS.Application.csproj reference
 Project reference(s)
 --------------------
 ..\DXOS.Domain\DXOS.Domain.csproj
 
-ExitCode: 0, Duration: 540ms
+ExitCode: 0, Duration: 397ms
 
 > dotnet list src\DXOS.Domain\DXOS.Domain.csproj reference
 There are no Project to Project references in project src\DXOS.Domain\DXOS.Domain.csproj.
 
-ExitCode: 0, Duration: 281ms
+ExitCode: 0, Duration: 190ms
 
 > dotnet list src\DXOS.Infrastructure\DXOS.Infrastructure.csproj reference
 Project reference(s)
@@ -252,14 +252,14 @@ Project reference(s)
 ..\DXOS.Application\DXOS.Application.csproj
 ..\DXOS.Domain\DXOS.Domain.csproj
 
-ExitCode: 0, Duration: 545ms
+ExitCode: 0, Duration: 403ms
 
 > dotnet list src\DXOS.Workflows\DXOS.Workflows.csproj reference
 Project reference(s)
 --------------------
 ..\DXOS.Application\DXOS.Application.csproj
 
-ExitCode: 0, Duration: 492ms
+ExitCode: 0, Duration: 396ms
 
 > dotnet list tests\DXOS.Architecture.Tests\DXOS.Architecture.Tests.csproj reference
 Project reference(s)
@@ -270,7 +270,7 @@ Project reference(s)
 ..\..\src\DXOS.Api\DXOS.Api.csproj
 ..\..\src\DXOS.Infrastructure\DXOS.Infrastructure.csproj
 
-ExitCode: 0, Duration: 476ms
+ExitCode: 0, Duration: 415ms
 
 > dotnet list tests\DXOS.Integration.Tests\DXOS.Integration.Tests.csproj reference
 Project reference(s)
@@ -281,7 +281,7 @@ Project reference(s)
 ..\..\src\DXOS.Api\DXOS.Api.csproj
 ..\..\src\DXOS.Infrastructure\DXOS.Infrastructure.csproj
 
-ExitCode: 0, Duration: 541ms
+ExitCode: 0, Duration: 406ms
 
 > dotnet list tests\DXOS.Unit.Tests\DXOS.Unit.Tests.csproj reference
 Project reference(s)
@@ -292,7 +292,7 @@ Project reference(s)
 ..\..\src\DXOS.Api\DXOS.Api.csproj
 ..\..\src\DXOS.Infrastructure\DXOS.Infrastructure.csproj
 
-ExitCode: 0, Duration: 501ms
+ExitCode: 0, Duration: 414ms
 Exact project graph policy enforced. Acyclic property implicitly verified by edge map matching.
 
 --- 3. CPM, Feeds, and Packages ---
@@ -302,19 +302,19 @@ Registered Sources:
   1.  nuget.org [Enabled]
       https://api.nuget.org/v3/index.json
 
-ExitCode: 0, Duration: 283ms
+ExitCode: 0, Duration: 231ms
 
 > dotnet list DXOS.slnx package --include-transitive
   Determining projects to restore...
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Application\DXOS.Application.csproj (in 129 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Infrastructure\DXOS.Infrastructure.csproj (in 129 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Api\DXOS.Api.csproj (in 129 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Domain\DXOS.Domain.csproj (in 120 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Workflows\DXOS.Workflows.csproj (in 129 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.AppHost\DXOS.AppHost.csproj (in 130 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Integration.Tests\DXOS.Integration.Tests.csproj (in 243 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Unit.Tests\DXOS.Unit.Tests.csproj (in 243 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Architecture.Tests\DXOS.Architecture.Tests.csproj (in 243 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Infrastructure\DXOS.Infrastructure.csproj (in 156 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Domain\DXOS.Domain.csproj (in 147 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Application\DXOS.Application.csproj (in 156 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Workflows\DXOS.Workflows.csproj (in 157 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Api\DXOS.Api.csproj (in 156 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.AppHost\DXOS.AppHost.csproj (in 157 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Architecture.Tests\DXOS.Architecture.Tests.csproj (in 253 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Unit.Tests\DXOS.Unit.Tests.csproj (in 253 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Integration.Tests\DXOS.Integration.Tests.csproj (in 253 ms).
 Project 'DXOS.Api' has the following package references
    [net10.0]: No packages were found for this framework.
 Project 'DXOS.AppHost' has the following package references
@@ -409,7 +409,7 @@ Project 'DXOS.Unit.Tests' has the following package references
    > xunit.v3.runner.inproc.console                           3.2.2   
 
 
-ExitCode: 0, Duration: 3012ms
+ExitCode: 0, Duration: 2405ms
 
 Package | Version | Consumers | License | Evidence Source
 ------- | ------- | --------- | ------- | ---------------
@@ -442,30 +442,6 @@ Equality Proof: PASS (Counts match)
 --- 4. Lock-file verification (Pre-Restore) ---
 
 > git ls-files --others --cached --exclude-standard
-.editorconfig
-Directory.Build.props
-Directory.Build.targets
-Directory.Packages.props
-NuGet.Config
-artifacts/task-runs/open_source-cab.2/gen-reports.ps1
-artifacts/task-runs/open_source-cab.2/implementation-report.md
-artifacts/task-runs/open_source-cab.2/prompt.md
-artifacts/task-runs/open_source-cab.2/review.md
-artifacts/task-runs/open_source-cab.2/run-r2-verification.ps1
-artifacts/task-runs/open_source-cab.2/verification-output.sha256
-artifacts/task-runs/open_source-cab.2/verification-output.txt
-artifacts/task-runs/open_source-cab.2/verification.md
-artifacts/task-runs/open_source-cab.2/verify-r2.ps1
-global.json
-src/DXOS.Api/packages.lock.json
-src/DXOS.AppHost/packages.lock.json
-src/DXOS.Application/packages.lock.json
-src/DXOS.Domain/packages.lock.json
-src/DXOS.Infrastructure/packages.lock.json
-src/DXOS.Workflows/packages.lock.json
-tests/DXOS.Architecture.Tests/packages.lock.json
-tests/DXOS.Integration.Tests/packages.lock.json
-tests/DXOS.Unit.Tests/packages.lock.json
 .agents/rules/00-authority.md
 .agents/rules/10-dotnet-architecture.md
 .agents/rules/20-testing.md
@@ -491,11 +467,16 @@ tests/DXOS.Unit.Tests/packages.lock.json
 .beads/hooks/prepare-commit-msg
 .beads/interactions.jsonl
 .beads/metadata.json
+.editorconfig
 .gitignore
 AGENTS.md
 DXOS.slnx
 DXOS_CODEX_MASTER_HANDOFF.md
+Directory.Build.props
+Directory.Build.targets
+Directory.Packages.props
 LICENSE-PENDING.md
+NuGet.Config
 OPEN_SOURCE.md
 README.md
 SECURITY.md
@@ -506,7 +487,16 @@ artifacts/task-runs/open_source-cab.1/implementation-report.md
 artifacts/task-runs/open_source-cab.1/inventory.csv
 artifacts/task-runs/open_source-cab.1/prompt.md
 artifacts/task-runs/open_source-cab.1/verification.md
+artifacts/task-runs/open_source-cab.2/implementation-report.md
+artifacts/task-runs/open_source-cab.2/prompt.md
+artifacts/task-runs/open_source-cab.2/review.md
+artifacts/task-runs/open_source-cab.2/run-r2-verification.ps1
+artifacts/task-runs/open_source-cab.2/verification-output.sha256
+artifacts/task-runs/open_source-cab.2/verification-output.txt
+artifacts/task-runs/open_source-cab.2/verification.md
+artifacts/task-runs/open_source-cab.2/verify-r2.ps1
 docs/audits/BOOTSTRAP-AUDIT-001.md
+global.json
 openspec/changes/bootstrap-remediation-001/.openspec.yaml
 openspec/changes/bootstrap-remediation-001/design.md
 openspec/changes/bootstrap-remediation-001/plan.md
@@ -524,72 +514,64 @@ scripts/reset-demo.ps1
 scripts/seed-demo.ps1
 src/DXOS.Api/DXOS.Api.csproj
 src/DXOS.Api/DXOS.Api.http
-src/DXOS.Api/FodyWeavers.xml
 src/DXOS.Api/Program.cs
 src/DXOS.Api/Properties/launchSettings.json
 src/DXOS.Api/appsettings.Development.json
 src/DXOS.Api/appsettings.json
+src/DXOS.Api/packages.lock.json
 src/DXOS.AppHost/DXOS.AppHost.csproj
-src/DXOS.AppHost/FodyWeavers.xml
-src/DXOS.AppHost/FodyWeavers.xsd
 src/DXOS.AppHost/Program.cs
+src/DXOS.AppHost/packages.lock.json
 src/DXOS.Application/Class1.cs
 src/DXOS.Application/DXOS.Application.csproj
-src/DXOS.Application/FodyWeavers.xml
-src/DXOS.Application/FodyWeavers.xsd
+src/DXOS.Application/packages.lock.json
 src/DXOS.Domain/Class1.cs
 src/DXOS.Domain/DXOS.Domain.csproj
-src/DXOS.Domain/FodyWeavers.xml
-src/DXOS.Domain/FodyWeavers.xsd
+src/DXOS.Domain/packages.lock.json
 src/DXOS.Infrastructure/Class1.cs
 src/DXOS.Infrastructure/DXOS.Infrastructure.csproj
-src/DXOS.Infrastructure/FodyWeavers.xml
-src/DXOS.Infrastructure/FodyWeavers.xsd
+src/DXOS.Infrastructure/packages.lock.json
 src/DXOS.Workflows/Class1.cs
 src/DXOS.Workflows/DXOS.Workflows.csproj
-src/DXOS.Workflows/FodyWeavers.xml
-src/DXOS.Workflows/FodyWeavers.xsd
+src/DXOS.Workflows/packages.lock.json
 tests/DXOS.Architecture.Tests/DXOS.Architecture.Tests.csproj
-tests/DXOS.Architecture.Tests/FodyWeavers.xml
 tests/DXOS.Architecture.Tests/UnitTest1.cs
-tests/DXOS.E2E.Tests/DXOS.E2E.Tests.csproj
-tests/DXOS.E2E.Tests/FodyWeavers.xml
-tests/DXOS.E2E.Tests/UnitTest1.cs
+tests/DXOS.Architecture.Tests/packages.lock.json
 tests/DXOS.Integration.Tests/DXOS.Integration.Tests.csproj
-tests/DXOS.Integration.Tests/FodyWeavers.xml
 tests/DXOS.Integration.Tests/UnitTest1.cs
+tests/DXOS.Integration.Tests/packages.lock.json
 tests/DXOS.Unit.Tests/DXOS.Unit.Tests.csproj
-tests/DXOS.Unit.Tests/FodyWeavers.xml
 tests/DXOS.Unit.Tests/UnitTest1.cs
+tests/DXOS.Unit.Tests/packages.lock.json
 
-ExitCode: 0, Duration: 44ms
+ExitCode: 0, Duration: 30ms
 
 > git check-ignore src\DXOS.Api\packages.lock.json
-ExitCode: 1, Duration: 44ms
+ExitCode: 1, Duration: 26ms
 
 > git check-ignore src\DXOS.AppHost\packages.lock.json
-ExitCode: 1, Duration: 39ms
+ExitCode: 1, Duration: 25ms
 
 > git check-ignore src\DXOS.Application\packages.lock.json
-ExitCode: 1, Duration: 37ms
+ExitCode: 1, Duration: 24ms
 
 > git check-ignore src\DXOS.Domain\packages.lock.json
-ExitCode: 1, Duration: 52ms
+ExitCode: 1, Duration: 24ms
 
 > git check-ignore src\DXOS.Infrastructure\packages.lock.json
-ExitCode: 1, Duration: 36ms
+ExitCode: 1, Duration: 25ms
 
 > git check-ignore src\DXOS.Workflows\packages.lock.json
-ExitCode: 1, Duration: 49ms
+ExitCode: 1, Duration: 26ms
 
 > git check-ignore tests\DXOS.Architecture.Tests\packages.lock.json
-ExitCode: 1, Duration: 40ms
+ExitCode: 1, Duration: 24ms
 
 > git check-ignore tests\DXOS.Integration.Tests\packages.lock.json
-ExitCode: 1, Duration: 50ms
+ExitCode: 1, Duration: 25ms
 
 > git check-ignore tests\DXOS.Unit.Tests\packages.lock.json
-ExitCode: 1, Duration: 36ms
+ExitCode: 1, Duration: 25ms
 
 --- 5. Repository and Cleanup Safety ---
 
@@ -597,17 +579,17 @@ ExitCode: 1, Duration: 36ms
 
 > dotnet restore DXOS.slnx --locked-mode
   Determining projects to restore...
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Domain\DXOS.Domain.csproj (in 130 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Application\DXOS.Application.csproj (in 142 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Infrastructure\DXOS.Infrastructure.csproj (in 142 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Workflows\DXOS.Workflows.csproj (in 142 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Api\DXOS.Api.csproj (in 142 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.AppHost\DXOS.AppHost.csproj (in 143 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Architecture.Tests\DXOS.Architecture.Tests.csproj (in 313 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Integration.Tests\DXOS.Integration.Tests.csproj (in 313 ms).
-  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Unit.Tests\DXOS.Unit.Tests.csproj (in 313 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.AppHost\DXOS.AppHost.csproj (in 128 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Domain\DXOS.Domain.csproj (in 120 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Workflows\DXOS.Workflows.csproj (in 128 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Application\DXOS.Application.csproj (in 128 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Api\DXOS.Api.csproj (in 128 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Infrastructure\DXOS.Infrastructure.csproj (in 128 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Unit.Tests\DXOS.Unit.Tests.csproj (in 231 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Architecture.Tests\DXOS.Architecture.Tests.csproj (in 231 ms).
+  Restored C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Integration.Tests\DXOS.Integration.Tests.csproj (in 231 ms).
 
-ExitCode: 0, Duration: 1350ms
+ExitCode: 0, Duration: 1128ms
 
 --- 7. Lock-file verification (Post-Restore) ---
 File | Before Size | Before Hash | After Size | After Hash | Ignored | Unchanged
@@ -631,97 +613,54 @@ tests\DXOS.Unit.Tests\packages.lock.json | 7289 | 6D42EE182E28DE4296C0389BFF2D97
   DXOS.Workflows -> C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Workflows\bin\Release\net10.0\DXOS.Workflows.dll
   DXOS.Api -> C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.Api\bin\Release\net10.0\DXOS.Api.dll
   DXOS.AppHost -> C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\src\DXOS.AppHost\bin\Release\net10.0\DXOS.AppHost.dll
+  DXOS.Architecture.Tests -> C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Architecture.Tests\bin\Release\net10.0\DXOS.Architecture.Tests.dll
   DXOS.Unit.Tests -> C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Unit.Tests\bin\Release\net10.0\DXOS.Unit.Tests.dll
   DXOS.Integration.Tests -> C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Integration.Tests\bin\Release\net10.0\DXOS.Integration.Tests.dll
-  DXOS.Architecture.Tests -> C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\tests\DXOS.Architecture.Tests\bin\Release\net10.0\DXOS.Architecture.Tests.dll
 
 Build succeeded.
     0 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:02.32
+Time Elapsed 00:00:01.70
 
-ExitCode: 0, Duration: 2670ms
+ExitCode: 0, Duration: 1927ms
 
 --- 9. Hygiene and Tracked Artifacts ---
 
 > git diff --check
 warning: in the working copy of '.beads/interactions.jsonl', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'DXOS.slnx', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'openspec/changes/bootstrap-remediation-001/tasks.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'artifacts/task-runs/open_source-cab.2/implementation-report.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'artifacts/task-runs/open_source-cab.2/review.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'artifacts/task-runs/open_source-cab.2/verification-output.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'artifacts/task-runs/open_source-cab.2/verification.md', LF will be replaced by CRLF the next time Git touches it
 
-ExitCode: 0, Duration: 74ms
+ExitCode: 0, Duration: 39ms
 
 > git status --short
  M .beads/interactions.jsonl
- M .gitignore
- M DXOS.slnx
+ M artifacts/task-runs/open_source-cab.2/implementation-report.md
+ M artifacts/task-runs/open_source-cab.2/review.md
+ M artifacts/task-runs/open_source-cab.2/verification-output.sha256
+ M artifacts/task-runs/open_source-cab.2/verification-output.txt
+ M artifacts/task-runs/open_source-cab.2/verification.md
+ M artifacts/task-runs/open_source-cab.2/verify-r2.ps1
  M openspec/changes/bootstrap-remediation-001/tasks.md
- M scripts/check.ps1
- M scripts/reset-demo.ps1
- M scripts/seed-demo.ps1
- M src/DXOS.Api/DXOS.Api.csproj
- D src/DXOS.Api/FodyWeavers.xml
- M src/DXOS.AppHost/DXOS.AppHost.csproj
- D src/DXOS.AppHost/FodyWeavers.xml
- D src/DXOS.AppHost/FodyWeavers.xsd
- M src/DXOS.Application/DXOS.Application.csproj
- D src/DXOS.Application/FodyWeavers.xml
- D src/DXOS.Application/FodyWeavers.xsd
- M src/DXOS.Domain/DXOS.Domain.csproj
- D src/DXOS.Domain/FodyWeavers.xml
- D src/DXOS.Domain/FodyWeavers.xsd
- M src/DXOS.Infrastructure/DXOS.Infrastructure.csproj
- D src/DXOS.Infrastructure/FodyWeavers.xml
- D src/DXOS.Infrastructure/FodyWeavers.xsd
- M src/DXOS.Workflows/DXOS.Workflows.csproj
- D src/DXOS.Workflows/FodyWeavers.xml
- D src/DXOS.Workflows/FodyWeavers.xsd
- M tests/DXOS.Architecture.Tests/DXOS.Architecture.Tests.csproj
- D tests/DXOS.Architecture.Tests/FodyWeavers.xml
- M tests/DXOS.Architecture.Tests/UnitTest1.cs
- D tests/DXOS.E2E.Tests/DXOS.E2E.Tests.csproj
- D tests/DXOS.E2E.Tests/FodyWeavers.xml
- D tests/DXOS.E2E.Tests/UnitTest1.cs
- M tests/DXOS.Integration.Tests/DXOS.Integration.Tests.csproj
- D tests/DXOS.Integration.Tests/FodyWeavers.xml
- M tests/DXOS.Integration.Tests/UnitTest1.cs
- M tests/DXOS.Unit.Tests/DXOS.Unit.Tests.csproj
- D tests/DXOS.Unit.Tests/FodyWeavers.xml
- M tests/DXOS.Unit.Tests/UnitTest1.cs
-?? .editorconfig
-?? Directory.Build.props
-?? Directory.Build.targets
-?? Directory.Packages.props
-?? NuGet.Config
-?? artifacts/task-runs/open_source-cab.2/
-?? global.json
-?? src/DXOS.Api/packages.lock.json
-?? src/DXOS.AppHost/packages.lock.json
-?? src/DXOS.Application/packages.lock.json
-?? src/DXOS.Domain/packages.lock.json
-?? src/DXOS.Infrastructure/packages.lock.json
-?? src/DXOS.Workflows/packages.lock.json
-?? tests/DXOS.Architecture.Tests/packages.lock.json
-?? tests/DXOS.Integration.Tests/packages.lock.json
-?? tests/DXOS.Unit.Tests/packages.lock.json
 
-ExitCode: 0, Duration: 48ms
+ExitCode: 0, Duration: 34ms
 
 > openspec.cmd validate bootstrap-remediation-001 --type change --strict --no-interactive
 Change 'bootstrap-remediation-001' is valid
 
-ExitCode: 0, Duration: 2625ms
+ExitCode: 0, Duration: 1670ms
 
 > bd.cmd dep cycles
 
 ✓ No dependency cycles detected
 
 
-ExitCode: 0, Duration: 1063ms
+ExitCode: 0, Duration: 813ms
 
 ==========================================
 VERIFICATION SUCCESS
-Total Duration: 24234.3963ms
+Total Duration: 18078.806ms
 ==========================================

@@ -1,11 +1,59 @@
 # Verification Report: BR001-R2
 
+## Repository Identity
+| Metric | Value |
+|---|---|
+| Working Directory | `C:\Users\199X\OneDrive\Máy tính\olympic\dx-os` |
+| HEAD Commit | 26f10dc031cbea23f63fe16d94cc2b99f63c9427 |
+| Branch | `main` |
+| Remote | none |
+| Git Status | 8 paths modified |
+
+## Modified Paths
+- `.beads/interactions.jsonl`
+- `artifacts/task-runs/open_source-cab.2/implementation-report.md`
+- `artifacts/task-runs/open_source-cab.2/review.md`
+- `artifacts/task-runs/open_source-cab.2/verification-output.sha256`
+- `artifacts/task-runs/open_source-cab.2/verification-output.txt`
+- `artifacts/task-runs/open_source-cab.2/verification.md`
+- `artifacts/task-runs/open_source-cab.2/verify-r2.ps1`
+- `openspec/changes/bootstrap-remediation-001/tasks.md`
+
+## OpenSpec and Beads Results
+| Check | Status |
+|---|---|
+| OpenSpec Validation | Passed |
+| Beads Issue Status | `in_progress` |
+| OpenSpec Tasks | R2.1 - R2.4 unchecked for review |
+
 ## Command Matrix
-| Command | Exit Code | Result |
+| Command | Exit Code | Duration | Result |
+|---|---|---|---|
+| `dotnet --version` | 0 | (see transcript) | `10.0.302` |
+| `dotnet restore DXOS.slnx --locked-mode` | 0 | (see transcript) | 0 errors |
+| `dotnet build DXOS.slnx -c Release --no-restore -warnaserror` | 0 | (see transcript) | 0 warnings, 0 errors |
+
+## Exact Project Graph
+- **DXOS.Domain**: none
+- **DXOS.Application**: -> DXOS.Domain
+- **DXOS.Workflows**: -> DXOS.Application
+- **DXOS.Infrastructure**: -> DXOS.Application, DXOS.Domain
+- **DXOS.Api**: -> DXOS.Application, DXOS.Infrastructure, DXOS.Workflows
+- **DXOS.AppHost**: -> DXOS.Api
+- **Test Projects** (each test project): -> DXOS.Domain, DXOS.Application, DXOS.Workflows, DXOS.Api, DXOS.Infrastructure
+
+## Evidence Identity
+| File | Size (bytes) | SHA-256 Hash |
 |---|---|---|
-| `dotnet --version` | 0 | 10.0.302 |
-| `dotnet restore DXOS.slnx --locked-mode` | 0 | 0 errors |
-| `dotnet build DXOS.slnx -c Release --no-restore -warnaserror` | 0 | 0 warnings, 0 errors |
+| `verification-output.txt` | EXTERNAL_FINAL_VERIFICATION | EXTERNAL_FINAL_VERIFICATION |
+| `verify-r2.ps1` | 26106 | 42B63AA451EEFC5D16EC25665535C9C42B4B66F0BE05354F66A61028834DB137 |
+| `run-r2-verification.ps1` | 5292 | 6DFB7F874134C1FCEE44ADE58186F3B09BD2A5BBC0F798FCDC07929FAD652639 |
+| `verification-output.sha256` | 64 | EXTERNAL_FINAL_VERIFICATION |
+
+**Policy**:
+- transcript size/hash = EXTERNAL_FINAL_VERIFICATION
+- `verification-output.sha256` is the authoritative sidecar
+- Codex will compare the final transcript mechanically against the sidecar
 
 ## Package and License Inventory
 | Package | Version | Consuming Projects | License | NuSpec Path |
