@@ -221,7 +221,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Dependencies:** BR001-R5.
   - **Allowed scope:** root `AGENTS.md`, `.agents/rules/**`, approved project skill pointers, encoding cleanup.
   - **Forbidden changes:** No duplicated generated instruction trees, Elsa build/test commands, speculative product rules, authority inversion, or raw chat memory.
-  - **Acceptance criteria:** UTF-8 guidance states authority order, OpenSpec/Beads roles, Gemini/Codex protocol, modular-monolith constraints, security/testing/data rules, and READY business gate.
+  - **Acceptance criteria:** UTF-8 guidance states authority order with the DX-OS constitution above lower project artifacts, OpenSpec/Beads roles, Gemini/Codex protocol, modular-monolith constraints, security/testing/data rules, non-negotiable OSS obligations, truthful OSS-claim language, and the READY business gate.
   - **Verification commands:** encoding validation; `rg` for required terms and forbidden Elsa commands/identity; fresh-agent navigation checklist.
   - **Required evidence:** Instruction inventory, encoding result, authority/path walkthrough.
   - **Rollback notes:** Restore last accepted DX-OS guidance, never old Elsa root instructions.
@@ -231,7 +231,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Dependencies:** BR001-R6.1.
   - **Allowed scope:** `openspec/**`, Beads spec links/dependencies/export, bootstrap ADRs.
   - **Forbidden changes:** No competing tracker/spec system, business product spec, closing unreviewed work, or ADR that contradicts accepted OpenSpec.
-  - **Acceptance criteria:** Strict OpenSpec validation passes; eight Beads children map bidirectionally with no cycles; ADRs cover repository extraction, modular monolith, PostgreSQL, Elsa NuGet, Aspire/Compose.
+  - **Acceptance criteria:** Strict OpenSpec validation passes; eight Beads children map bidirectionally with no cycles; the constitution and templates carry mandatory OSS gates; ADRs cover repository extraction, modular monolith, PostgreSQL, Elsa NuGet, Aspire/Compose, the Apache-2.0 default license decision, external-service disclosure, and AI provider independence.
   - **Verification commands:** `openspec.cmd validate --change bootstrap-remediation-001 --strict`; `openspec.cmd status`; `bd.cmd dep tree open_source-cab`; `bd.cmd dep cycles`; spec-link query.
   - **Required evidence:** Validation output, graph/mapping table, ADR index.
   - **Rollback notes:** Restore OpenSpec from Git and Beads from native backup/export; preserve accepted evidence.
@@ -275,7 +275,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Dependencies:** BR001-R7.2.
   - **Allowed scope:** DX-OS CI workflows, Full gate wiring, artifact retention, CI documentation.
   - **Forbidden changes:** No Elsa workflow copy, mutable third-party action, `continue-on-error` for required gate, hidden CI-only weaker threshold, or push/deploy.
-  - **Acceptance criteria:** CI runs restore/format/build/tests/runtime/Compose/Aspire/security/SBOM/OpenSpec checks with same semantics as local Full; required failure fails job; artifacts are retained.
+  - **Acceptance criteria:** CI runs restore/format/build/tests/runtime/Compose/Aspire/security/SBOM/OpenSpec checks with same semantics as local Full; it verifies the DX-OS license, attribution, dependency and service disclosures, public-source identity, and absence of undisclosed private-source dependencies; required failure fails the job; artifacts are retained.
   - **Verification commands:** workflow lint/inspection; `scripts\check.ps1 -Profile Full`; authorized CI run result and artifact download/hash checks.
   - **Required evidence:** Workflow SHAs, local/CI parity matrix, run identifiers, job conclusions, artifact hashes.
   - **Rollback notes:** Disable trigger only for verified security incident; keep evidence and earlier gates active.
@@ -283,23 +283,23 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
 - [ ] 7.4 **BR001-R7.4 Reconcile OSS, security, and source-license state.**
   - **Objective:** Ensure disclosures and distribution claims match actual resolved deliverables/tools.
   - **Dependencies:** BR001-R7.1–R7.3.
-  - **Allowed scope:** `OPEN_SOURCE.md`, `THIRD_PARTY_NOTICES.md`, `SECURITY.md`, approved DX-OS license/status, dependency approval evidence.
-  - **Forbidden changes:** No inherited Elsa authorship/license identity, omitted Apache NOTICE duty, claim for unused dependency, or public push without owner license approval.
-  - **Acceptance criteria:** Direct/transitive/runtime/tool dependencies are reconciled with versions/licenses/sources/distribution; source license is owner-approved or blocks public/READY state explicitly.
-  - **Verification commands:** compare `dotnet list package --include-transitive`, SBOM, tool manifest, notices; license/NOTICE link validation; secret scan of evidence.
-  - **Required evidence:** Reconciliation matrix, unresolved-license blocker if any, approval reference without sensitive content.
+  - **Allowed scope:** `OPEN_SOURCE.md`, `THIRD_PARTY_NOTICES.md`, `docs/THIRD_PARTY_SERVICES.md`, `SECURITY.md`, `LICENSE`, `NOTICE`, license ADRs, `artifacts/sbom.cdx.json`, dependency approval and reused-source provenance evidence.
+  - **Forbidden changes:** No inherited Elsa authorship/license identity, omitted Apache NOTICE duty, concealed copied/adapted/vendored/forked source, unsupported "100% open source" claim, service classified as an OSS dependency, claim for unused dependency, or public release without a valid DX-OS license.
+  - **Acceptance criteria:** Apache-2.0 is installed as the DX-OS license unless a verified superseding ADR selects another OSI-compatible license; every direct OSS component and actual transitive/runtime/tool/reused-source dependency is reconciled with component, version, source, license, purpose, modification, redistribution, and attribution state; all third-party services and development AI tools are disclosed separately; the SBOM matches the deliverable.
+  - **Verification commands:** compare `dotnet list package --include-transitive`, `artifacts/sbom.cdx.json`, tool manifest, source-provenance inventory, notices, and service disclosure; license/NOTICE link validation; secret scan of evidence; scan public text for prohibited absolute OSS claims.
+  - **Required evidence:** Dependency/attribution reconciliation matrix, service disclosure matrix, SBOM path/hash/schema result, license/ADR proof, approval reference without sensitive content, and any unresolved blocker.
   - **Rollback notes:** Revert incorrect disclosure; never erase attribution or fabricate a license.
 
 ## BR001-R8 Clean Clone Re-Audit
 
-**Beads mapping:** `open_source-cab.6` (all BR001-R8.x tasks). **Dependencies:** BR001-R7 PASS plus approved remote/source license.
+**Beads mapping:** `open_source-cab.6` (all BR001-R8.x tasks). **Dependencies:** BR001-R7 PASS plus a public DX-OS-owned remote and approved source license.
 
 - [ ] 8.1 **BR001-R8.1 Verify audit prerequisites and create empty clone.**
   - **Objective:** Ensure the audit tests the remote repository, not local overlay/cache state.
-  - **Dependencies:** BR001-R7; owner-approved DX-OS remote and license.
+  - **Dependencies:** BR001-R7; public owner-approved DX-OS remote and license.
   - **Allowed scope:** Read main new repository/remote/CI; create one validated disposable audit directory and clone.
   - **Forbidden changes:** No audit-time production fix, local file copy into clone, old checkout dependency, remote rewrite, force push, or broad temp deletion.
-  - **Acceptance criteria:** Clone parent was empty; remote is DX-OS-owned; revision recorded; no Elsa history/source/build inheritance; prerequisites/CI available.
+  - **Acceptance criteria:** Clone parent was empty; remote is public and DX-OS-owned; revision recorded; the repository has its own README, license, release metadata, CI, and reproducible instructions; no Elsa history/source/build inheritance or undisclosed private source; prerequisites/CI available.
   - **Verification commands:** `git clone`; `git -C <clone> rev-parse HEAD`; `git -C <clone> remote -v`; history/tree/reference queries.
   - **Required evidence:** Resolved paths, clone log/revision/remote, independence checks.
   - **Rollback notes:** Keep failed clone for review or remove only the exact validated disposable path with explicit safe cleanup.
@@ -309,7 +309,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Dependencies:** BR001-R8.1.
   - **Allowed scope:** Execute documented commands in clean clone; write audit evidence/output.
   - **Forbidden changes:** No skipped required tool, placeholder count, manual substitution, E2E PASS, result editing, or use of old checkout outputs.
-  - **Acceptance criteria:** Repository identity, SDK, restore, format, Release build, architecture, PostgreSQL/integration, Elsa, Aspire, Compose, fail-fast, Gitleaks, Trivy, SBOM, Grype, CI, OpenSpec, Beads, agents, OSS, and project state each have evidence; only UI E2E may be N/A.
+  - **Acceptance criteria:** Repository identity, SDK, locked restore, format, Release build, architecture, PostgreSQL/integration, Elsa, Aspire, Compose, DX-OS startup, documented demo, fail-fast, Gitleaks, Trivy, CycloneDX SBOM, Grype, CI, OpenSpec, Beads, agents, DX-OS license, dependency inventory, attribution/notices, third-party-service disclosure, source documentation, release metadata, and project state each have evidence; only UI E2E may be N/A.
   - **Verification commands:** `scripts\verify-check-contract.ps1`; `scripts\check.ps1 -Profile Full`; strict OpenSpec validation; Beads show/cycle query; CI artifact verification.
   - **Required evidence:** Per-gate matrix with command, exit, duration, output path/hash, PASS/FAIL/N/A and rationale.
   - **Rollback notes:** A failure creates narrow upstream remediation and re-runs audit; never edit production during the audit.
@@ -318,8 +318,8 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Objective:** Mark READY only when all required clean-clone evidence passes, then identify (not implement) the first product spec.
   - **Dependencies:** BR001-R8.2.
   - **Allowed scope:** `docs/audits/BOOTSTRAP-AUDIT-002.md`, project state, OpenSpec/Beads task status after Codex verdict.
-  - **Forbidden changes:** No READY with failed/missing/skipped/placeholder gate; no product proposal/implementation before READY; no deletion of old checkout.
-  - **Acceptance criteria:** Report verdict follows evidence; on READY, Beads/OpenSpec/project state align and next proposal is named `identity-organization-audit-foundation`; on failure, blocking items remain open with narrow fixes.
+  - **Forbidden changes:** No READY or competition-release-ready verdict with a missing DX-OS OSS license, incomplete attribution, missing SBOM, undisclosed required service, failed clean-clone source-to-demo path, undisclosed private-source dependency, or other failed/missing/skipped/placeholder gate; no product proposal/implementation before READY; no deletion of old checkout.
+  - **Acceptance criteria:** The final CLEAN CLONE / READY audit reports each OSS and competition-submission gate separately; on READY, Beads/OpenSpec/project state align and next proposal is named `identity-organization-audit-foundation`; on failure, blocking items remain open with narrow fixes.
   - **Verification commands:** report completeness checker; compare gate matrix to READY list; `bd.cmd ready --json`; `openspec.cmd status --change bootstrap-remediation-001`.
   - **Required evidence:** Signed-off verdict, state-transition diff, next-task output, old-checkout preservation statement.
   - **Rollback notes:** Revert only incorrect state transitions; audit evidence remains append-only and the old checkout remains backup until separate owner authorization.

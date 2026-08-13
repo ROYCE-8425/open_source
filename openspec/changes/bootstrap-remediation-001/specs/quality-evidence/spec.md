@@ -62,7 +62,7 @@ The accepted quality/CI path SHALL execute Gitleaks, Trivy, Syft SBOM generation
 - **AND** the report identifies the tool, rule/advisory, affected artifact, and disposition path
 
 ### Requirement: SBOM reflects resolved deliverables
-The generated SBOM SHALL describe the actual resolved application/container dependencies for the verified commit and SHALL be retained as a CI/task evidence artifact.
+The generated CycloneDX SBOM at `artifacts/sbom.cdx.json` SHALL describe the actual resolved application/container dependencies for the verified commit and SHALL be retained as a repository, CI, and task evidence artifact.
 
 #### Scenario: SBOM is generated
 - **WHEN** the quality or release evidence workflow runs
@@ -77,11 +77,35 @@ DX-OS CI SHALL execute the same required correctness/security contracts as the d
 - **THEN** CI reports separate results for restore, format, build, tests, runtime/container validation, security scans, SBOM, and OpenSpec validation
 
 ### Requirement: OSS disclosures match actual dependencies
-`OPEN_SOURCE.md`, `THIRD_PARTY_NOTICES.md`, license records, and dependency approval evidence SHALL cover actual shipped packages, tools, copied material, and external services without claiming unintegrated components.
+`OPEN_SOURCE.md`, `THIRD_PARTY_NOTICES.md`, license records, and dependency approval evidence SHALL cover every directly used OSS component and all actual shipped packages, tools, and copied material without claiming unintegrated components. Each entry records component, version, source/project, license, DX-OS purpose, modification status, and redistribution status. External services SHALL be maintained in a separate disclosure.
 
 #### Scenario: Dependency inventory changes
 - **WHEN** an approved dependency is added, removed, or upgraded
 - **THEN** disclosure and license evidence are updated in the same reviewed task when required
+
+### Requirement: Reused source attribution is preserved
+Copied, adapted, vendored, or forked OSS source MUST preserve required copyright/license notices, identify the upstream project and version/tag/commit where practical, describe material modifications, and satisfy redistribution requirements.
+
+#### Scenario: Reused source enters the repository
+- **WHEN** review detects code derived from another project
+- **THEN** provenance, notices, modifications, and redistribution duties are recorded before acceptance
+- **AND** missing or concealed attribution fails the quality and release gate
+
+### Requirement: OSS claims are factually scoped
+Project and competition language MUST distinguish DX-OS source code, the primarily open-source core runtime stack, disclosed OSS dependencies, separately disclosed third-party APIs/services, and development AI tooling. The project MUST NOT claim that every tool used during development or the complete system is "100% open source" unless that statement is independently verified.
+
+#### Scenario: Public OSS claim is reviewed
+- **WHEN** README, release notes, demo material, or competition copy describes the project's open-source status
+- **THEN** the claim uses the approved scope distinctions
+- **AND** proprietary services or development tools are not hidden or mislabeled
+
+### Requirement: Competition release gate is fail-closed
+DX-OS MUST NOT be marked competition-release-ready when its own OSS license is missing, attribution is incomplete, `artifacts/sbom.cdx.json` is missing, required third-party services are undisclosed, the clean-clone build/demo fails, or the application depends on undisclosed private source.
+
+#### Scenario: Release evidence is incomplete
+- **WHEN** any required OSS, service, reproducibility, deployment, or source-documentation artifact is missing or stale
+- **THEN** CI/release evaluation fails non-zero
+- **AND** READY and competition-release-ready remain false
 
 ### Requirement: READY is established only by clean-clone evidence
 Bootstrap MUST remain `NOT_READY` until a clean-clone re-audit records PASS for every required READY gate and no placeholder evidence is counted.
@@ -89,4 +113,3 @@ Bootstrap MUST remain `NOT_READY` until a clean-clone re-audit records PASS for 
 #### Scenario: One required gate is not executable
 - **WHEN** the follow-up audit finds a required gate failed, skipped, missing, or not verified
 - **THEN** the verdict is not `READY`
-

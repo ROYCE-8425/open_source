@@ -27,6 +27,7 @@ This change accepts the audit findings without reopening a broad audit:
 - Replace placeholder tests with meaningful unit, architecture, and PostgreSQL integration tests; treat E2E as explicitly `NOT_APPLICABLE` until a real UI exists.
 - Replace the false-green quality script with a Windows-safe, fail-fast command that verifies tools, propagates exit codes, and targets `DXOS.slnx` explicitly.
 - Add deterministic CI, secret/vulnerability/container scanning, Syft SBOM generation, Grype or an approved equivalent, and accurate OSS/license disclosures.
+- Establish DX-OS itself as an open-source project: an independently owned public source repository, an ADR-governed OSI-compatible license decision (Apache-2.0 by default), reproducible source-to-demo instructions, complete dependency/attribution/service disclosures, and provider-independent AI boundaries.
 - Establish OpenSpec, Beads, agent-rule, task-evidence, and project-state procedures that are durable in the new repository.
 - Require a clean-clone re-audit to prove every READY gate before any business feature specification starts.
 
@@ -70,6 +71,10 @@ Bootstrap is `READY` only when a clean clone of the new DX-OS repository proves 
 - DX-OS CI executes the same required gates;
 - OpenSpec validates, Beads maps execution state, task evidence is durable, and project state is current;
 - OSS/license documents describe actual resolved dependencies and retained third-party material;
+- the DX-OS-owned source repository is public, carries its own approved OSS license and release metadata, and does not present itself as Elsa or an undisclosed fork;
+- `OPEN_SOURCE.md`, `THIRD_PARTY_NOTICES.md`, `artifacts/sbom.cdx.json`, and the separate third-party-service disclosure reconcile the verified deliverable;
+- clean-clone evidence proves clone, restore, build, infrastructure startup, DX-OS startup, and the documented demo without private source;
+- no release or competition-ready claim is made while the project license, attribution, SBOM, service disclosure, clean-clone path, or public-source independence is incomplete;
 - no empty test is counted as evidence and E2E is explicitly `NOT_APPLICABLE` unless a real UI exists;
 - the follow-up bootstrap audit records `READY`.
 

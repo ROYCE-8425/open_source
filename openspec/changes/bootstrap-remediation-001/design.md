@@ -147,13 +147,21 @@ Every issue writes durable evidence under `artifacts/task-runs/<task-id>/`. `pro
 
 ### 15. OSS and license documentation
 
-The new repository has a Product Owner-approved DX-OS license rather than silently inheriting Elsa's copyright/identity. `OPEN_SOURCE.md` describes dependency policy and review. `THIRD_PARTY_NOTICES.md` records direct/runtime/tool dependencies, versions, licenses, source URLs, distribution status, and attribution/NOTICE duties. SBOM and resolved license evidence are generated from actual deliverables; they do not claim unused packages.
+DX-OS is itself an open-source project, not merely a consumer of open-source dependencies. Its source lives in an independently owned public repository with its own identity, history, README, license, release metadata, CI, and reproducible build/run/demo instructions. The repository must not identify itself as Elsa, reuse Elsa's license as the DX-OS licensing decision, or conceal forked, copied, adapted, or vendored source.
+
+ADR-0001 selects Apache License 2.0 as the DX-OS default because it is OSI-approved and includes an explicit patent grant. A different OSI-compatible license requires verified competition, dependency, compatibility, or project evidence and a superseding ADR. `OPEN_SOURCE.md` describes dependency policy and review. `THIRD_PARTY_NOTICES.md` records direct/runtime/tool dependencies, versions, licenses, source URLs, purposes, modification status, redistribution status, and attribution/NOTICE duties. `artifacts/sbom.cdx.json` is generated from the actual deliverable. Reused source preserves upstream notices and records the upstream project and version/tag/commit where practical plus material modifications.
+
+External services are disclosed separately from OSS dependencies, including development AI tools and any runtime email/SMS, advertising, cloud, SaaS, or proprietary API. Proprietary development tooling does not change the DX-OS source license, but an undocumented proprietary paid runtime dependency is prohibited. Project language distinguishes DX-OS source, the primarily open-source runtime stack, disclosed OSS dependencies, disclosed third-party services, and development tooling; it must not claim "100% open source" without verified evidence.
+
+ADR-0002 requires an AI provider boundary so domain logic is not permanently coupled to Gemini, OpenAI, or any other provider. The boundary must permit Gemini, an OpenAI-compatible provider, a local/open-weight model, and future providers where practical without rewriting business modules.
 
 No Elsa source or documentation is redistributed. Elsa is named as an MIT NuGet dependency. Copied DX-OS-authored artifacts retain their own provenance record in the extraction manifest.
 
 ### 16. Clean-clone verification and READY transition
 
-R8 clones the new DX-OS remote into an empty temporary directory on a supported machine/runner. It verifies repository identity and every READY gate without access to the old checkout or untracked files. The audit records PASS/FAIL/NOT_APPLICABLE separately with commands and exit codes. Any missing, skipped, placeholder, or environment-dependent required gate keeps the verdict below READY.
+R8 clones the public DX-OS remote into an empty temporary directory on a supported machine/runner. It verifies repository identity and every READY gate without access to the old checkout, private source, or untracked files. The clean user journey is clone, locked dependency restore, source build, required infrastructure startup, DX-OS startup, and documented demo execution. The audit records PASS/FAIL/NOT_APPLICABLE separately with commands and exit codes. Any missing, skipped, placeholder, or environment-dependent required gate keeps the verdict below READY.
+
+The competition release gate also requires the project OSS license, complete attribution, dependency inventory, CycloneDX SBOM, installation and Docker/Compose instructions, source-level documentation, release metadata, and third-party-service disclosure. Missing license, attribution, SBOM, service disclosure, clean-clone evidence, or independence from undisclosed private source is an unconditional release blocker.
 
 Only after the follow-up report is READY may `identity-organization-audit-foundation` be proposed. It is not created by this change.
 
@@ -161,7 +169,7 @@ Only after the follow-up report is READY may `identity-organization-audit-founda
 
 - **[Only complete bootstrap copy is the overlay]** → Hash and classify every candidate before copying; keep the old checkout unchanged until clean-clone READY.
 - **[Sibling target path already contains data]** → Resolve absolute source/target paths and fail before writing unless the target is absent or an explicitly empty newly created directory.
-- **[No approved DX-OS remote exists yet]** → Initialize independent local history with no remote, record `REMOTE_PENDING_OWNER_AUTHORIZATION`, and do not mark clean-clone READY until an approved remote is configured and cloned.
+- **[Approved remote is temporarily private and may be renamed]** → Preserve independent DX-OS history and the owner-approved remote; do not mark clean-clone READY until the repository is public, identifies DX-OS, and can be cloned without private-source access.
 - **[Beads state can be lost or corrupted during extraction]** → Take JSONL export plus Dolt-native backup, avoid live DB copying, and compare issue/dependency queries after restore/import.
 - **[SDK pin is newer than installed developer SDK]** → Fail explicitly with the required official SDK version; installation is a documented prerequisite, not an automatic hidden side effect.
 - **[Elsa bundle adds transitive packages]** → Accept for the first supported smoke, inventory it in SBOM/notices, and permit later component minimization only through an ADR and equivalent tests.
@@ -184,5 +192,5 @@ Rollback is always to stop using the new target and return to the untouched old 
 
 ## Open Questions
 
-- The final DX-OS remote URL and repository visibility are Product Owner-controlled external configuration. They do not change the extraction design; R1 may establish local independent history, but R8 cannot pass repository identity/clean-clone gates until the approved remote exists.
-- The final DX-OS source license selection requires Product Owner approval before the first public push. Until then, the new repository must use an explicit `LICENSE-PENDING` status in project state rather than copying Elsa's license identity or asserting a license not granted by the owner.
+- The Product Owner approved `https://github.com/ROYCE-8425/open_source.git` as the current DX-OS remote and may rename it later. Its temporary private visibility is acceptable during remediation but blocks the public clean-clone/competition gate.
+- On 2026-08-13 the Product Owner established DX-OS as an open-source project and approved Apache-2.0 as the default license decision, subject only to a verified superseding ADR. `LICENSE-PENDING` is therefore retired; the remaining work is attribution, SBOM, service disclosure, public visibility, and clean-clone verification.

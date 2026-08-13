@@ -21,12 +21,28 @@ The extraction process SHALL produce a reviewed inventory that classifies every 
 - **AND** unresolved artifacts are not copied
 
 ### Requirement: New repository has independent identity
-The target repository MUST have DX-OS-owned Git history, remote configuration, package metadata, agent instructions, and license decision, and MUST NOT identify Elsa Core as the owning product.
+The target repository MUST have DX-OS-owned Git history, remote configuration, README, package and release metadata, CI, reproducible build instructions, agent instructions, and license decision, and MUST NOT identify Elsa Core as the owning product or present itself as an undisclosed fork.
 
 #### Scenario: Repository identity is inspected
 - **WHEN** an auditor checks the target repository root, Git remotes, root commit, build metadata, license, and agent instructions
 - **THEN** each identifies DX-OS or the approved DX-OS owner
 - **AND** no push remote targets `elsa-workflows/elsa-core`
+
+### Requirement: Final DX-OS source is publicly owned
+The final DX-OS-owned repository MUST make the team-developed source available publicly under the approved DX-OS OSS license and MUST NOT require access to private source code to build or run the documented product.
+
+#### Scenario: Public repository ownership is audited
+- **WHEN** the final repository and release metadata are inspected
+- **THEN** the public source, history, README, license, CI, releases, and build instructions identify DX-OS
+- **AND** any temporary repository name or private visibility keeps the competition release below READY
+
+### Requirement: DX-OS license is an explicit ADR decision
+The project MUST record its own OSI-compatible source-license decision in an ADR. Apache-2.0 SHALL be the default unless verified competition, dependency, compatibility, or project evidence justifies a superseding ADR.
+
+#### Scenario: License state is reviewed
+- **WHEN** repository or release readiness is evaluated
+- **THEN** the canonical DX-OS license and governing ADR agree
+- **AND** Elsa's license file is not used as the DX-OS licensing decision
 
 ### Requirement: Elsa source is external to the build repository
 The target repository MUST NOT contain or depend on the Elsa Core source tree, Elsa solution, Elsa project files, inherited Elsa build files, or Elsa CI workflows.
@@ -77,9 +93,9 @@ The Engineering OS MUST NOT introduce a generic `Repository<T>`, a UnitOfWork wr
 - **THEN** review returns `FIX_REQUIRED`
 
 ### Requirement: Clean clone is independent of the old checkout
-The target repository SHALL restore, build, test, and start its required bootstrap runtime from a clean clone when the old Elsa checkout is unavailable.
+The target repository SHALL restore, build, test, start required infrastructure, start DX-OS, and execute the documented demo from a clean clone when the old Elsa checkout and all private source are unavailable.
 
 #### Scenario: Old checkout is absent
 - **WHEN** verification runs in a clean directory with no Elsa source checkout on disk
 - **THEN** no build, test, runtime, documentation, or script path resolves into the old checkout
-
+- **AND** the documented source-to-demo sequence completes using only public repository content and disclosed prerequisites
