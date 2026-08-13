@@ -50,7 +50,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
 
 **Beads mapping:** `open_source-cab.2` (all BR001-R2.x tasks). **Dependencies:** BR001-R1 PASS.
 
-- [ ] 2.1 **BR001-R2.1 Recreate SDK and root build policy.**
+- [x] 2.1 **BR001-R2.1 Recreate SDK and root build policy.**
   - **Objective:** Make .NET 10 compilation policy DX-OS-owned and deterministic.
   - **Dependencies:** BR001-R1.
   - **Allowed scope:** `global.json`, `Directory.Build.props/targets`, `.editorconfig`, `.gitignore`, DX-OS repository/package metadata.
@@ -60,7 +60,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Effective SDK/MSBuild properties and old-vs-new root metadata summary.
   - **Rollback notes:** Revert only recreated DX-OS root files to the R1 snapshot.
 
-- [ ] 2.2 **BR001-R2.2 Recreate minimal CPM and NuGet feeds.**
+- [x] 2.2 **BR001-R2.2 Recreate minimal CPM and NuGet feeds.**
   - **Objective:** Admit only current approved direct dependencies from stable sources.
   - **Dependencies:** BR001-R2.1.
   - **Allowed scope:** `Directory.Packages.props`, `NuGet.Config`, lock-file policy, package/license evidence.
@@ -70,7 +70,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Direct/transitive package list, feed list, version/license reconciliation.
   - **Rollback notes:** Revert CPM/feed changes; never restore Elsa's catalog as fallback.
 
-- [ ] 2.3 **BR001-R2.3 Establish solution and project direction.**
+- [x] 2.3 **BR001-R2.3 Establish solution and project direction.**
   - **Objective:** Retain the smallest coarse DX-OS project graph that enforces the approved modular-monolith boundary.
   - **Dependencies:** BR001-R2.1–R2.2.
   - **Allowed scope:** `DXOS.slnx`, DXOS project files, minimal project-reference validation, removal/collapse of empty ceremony projects when justified.
@@ -80,7 +80,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Project inventory/responsibility, dependency graph, cycle/source-coupling result.
   - **Rollback notes:** Restore last passing new-repository project graph; do not recover from Elsa solution files.
 
-- [ ] 2.4 **BR001-R2.4 Prove clean restore and Release build.**
+- [x] 2.4 **BR001-R2.4 Prove clean restore and Release build.**
   - **Objective:** Demonstrate the recreated foundation independently of old outputs/caches.
   - **Dependencies:** BR001-R2.1–R2.3.
   - **Allowed scope:** Clean generated outputs, restore/build evidence, lock files if policy requires them.

@@ -1,4 +1,6 @@
-﻿namespace DXOS.Architecture.Tests;
+using Xunit;
+
+namespace DXOS.Architecture.Tests;
 
 public class UnitTest1
 {

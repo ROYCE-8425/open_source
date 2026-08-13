@@ -1,4 +1,6 @@
-﻿namespace DXOS.Integration.Tests;
+using Xunit;
+
+namespace DXOS.Integration.Tests;
 
 public class UnitTest1
 {
