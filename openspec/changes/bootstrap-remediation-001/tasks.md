@@ -94,7 +94,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
 
 **Beads mapping:** `open_source-cab.7` (all BR001-R3.x tasks). **Dependencies:** BR001-R2 PASS.
 
-- [ ] 3.1 **BR001-R3.1 Define gate profiles and evidence contract.**
+- [x] 3.1 **BR001-R3.1 Define gate profiles and evidence contract.**
   - **Objective:** Specify `Foundation`, `Runtime`, and default `Full` checks without creating bypass semantics.
   - **Dependencies:** BR001-R2.
   - **Allowed scope:** Gate script interface, required-check manifest, evidence schema, development documentation.
@@ -104,7 +104,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Interface/manifest table, sample failure output, profile-difference rationale.
   - **Rollback notes:** Revert R3 documentation/script skeleton only; retain audit evidence of the false-green predecessor.
 
-- [ ] 3.2 **BR001-R3.2 Implement native fail-fast runner and preflight.**
+- [x] 3.2 **BR001-R3.2 Implement native fail-fast runner and preflight.**
   - **Objective:** Ensure missing tools and native command failures terminate with the original failure visible.
   - **Dependencies:** BR001-R3.1.
   - **Allowed scope:** `scripts/check.ps1` and narrowly scoped helpers/output ignore rules.
@@ -114,7 +114,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Success and negative outputs with exit codes, sanitized command transcript.
   - **Rollback notes:** Revert helper/gate changes together so partial error handling cannot remain active.
 
-- [ ] 3.3 **BR001-R3.3 Add gate contract verifier and Foundation wiring.**
+- [x] 3.3 **BR001-R3.3 Add gate contract verifier and Foundation wiring.**
   - **Objective:** Make fail-fast behavior regression-testable and run real foundation gates.
   - **Dependencies:** BR001-R3.1–R3.2.
   - **Allowed scope:** `scripts/verify-check-contract.ps1`, temporary test fixtures under gitignored output, Foundation restore/format/build/OpenSpec steps.

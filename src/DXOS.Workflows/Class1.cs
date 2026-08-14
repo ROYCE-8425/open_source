@@ -1,4 +1,4 @@
-﻿namespace DXOS.Workflows;
+namespace DXOS.Workflows;
 
 public class Class1
 {

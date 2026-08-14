@@ -1,4 +1,4 @@
-﻿namespace DXOS.Infrastructure;
+namespace DXOS.Infrastructure;
 
 public class Class1
 {

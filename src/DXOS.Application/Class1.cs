@@ -1,4 +1,4 @@
-﻿namespace DXOS.Application;
+namespace DXOS.Application;
 
 public class Class1
 {
