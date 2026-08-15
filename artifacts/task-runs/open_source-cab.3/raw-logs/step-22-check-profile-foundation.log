@@ -1,0 +1,21 @@
+
+=== Running Gate: foundation-restore (BR001-R2.4) ===
+Profile: Foundation | Status: READY | Timeout: 60s
+Gate succeeded.
+
+=== Running Gate: foundation-format (BR001-R2.4) ===
+Profile: Foundation | Status: READY | Timeout: 30s
+Gate succeeded.
+
+=== Running Gate: foundation-build (BR001-R2.4) ===
+Profile: Foundation | Status: READY | Timeout: 120s
+Gate succeeded.
+
+=== Running Gate: foundation-openspec (BR001-R6.2) ===
+Profile: Foundation | Status: READY | Timeout: 30s
+Gate succeeded.
+
+=== Running Gate: foundation-hygiene (BR001-R2.4) ===
+Profile: Foundation | Status: READY | Timeout: 15s
+Gate succeeded.
+

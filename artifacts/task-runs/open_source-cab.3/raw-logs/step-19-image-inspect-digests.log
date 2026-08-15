@@ -1,0 +1,203 @@
+=== Postgres 18.4 Alpine Image Inspection ===
+[
+    {
+        "Id": "sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15",
+        "RepoTags": [
+            "postgres:18.4-alpine"
+        ],
+        "RepoDigests": [
+            "postgres@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15"
+        ],
+        "Comment": "buildkit.dockerfile.v0",
+        "Created": "2026-07-07T17:46:12.778761801Z",
+        "Config": {
+            "ExposedPorts": {
+                "5432/tcp": {}
+            },
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "GOSU_VERSION=1.19",
+                "LANG=en_US.utf8",
+                "PG_MAJOR=18",
+                "PG_VERSION=18.4",
+                "PG_SHA256=81a81ec695fb0c7901407defaa1d2f7973617154cf27ba74e3a7ab8e64436094",
+                "DOCKER_PG_LLVM_DEPS=llvm21-dev \t\tclang21",
+                "PGDATA=/var/lib/postgresql/18/docker"
+            ],
+            "Entrypoint": [
+                "docker-entrypoint.sh"
+            ],
+            "Cmd": [
+                "postgres"
+            ],
+            "Volumes": {
+                "/var/lib/postgresql": {}
+            },
+            "WorkingDir": "/",
+            "StopSignal": "SIGINT"
+        },
+        "Architecture": "amd64",
+        "Os": "linux",
+        "Size": 119995681,
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:34884abbe92863fce933ed7c39c0e045631af0ed86d5cc0dfbdf9fdca426ce3c",
+                "sha256:b0efa1a0f321b1ea76da290fc0185c6b5d68f6f7f9e6ab7a0a69795714997cf4",
+                "sha256:833feec0ede441f55add4ae344c08ccbfb5248f4b56fb582a3f9e02052ad9854",
+                "sha256:ab2f5df74059b3552268af9d38ef21a588e756e376175b63113a9c3b6ed54f56",
+                "sha256:222f0a33110f9e1ed3b15fe4b89b406218b413d973c371d6261bee5756a7b0a8",
+                "sha256:9642acdcbdf21470a2e37f67e9fdf9de21b8a9c00ea4f90b439697b5a497816f",
+                "sha256:3f9ba2ab413c4086a9efcd0ef8cde0253d34244819ed777553a512fe0574210b",
+                "sha256:1c6f9164d0ab2319422d20fd632cb6d45d207255b40818938fd5c2811cd5f9e5",
+                "sha256:9ab41b380d0135836c2cc5dfec98bc2f191fd207c7e4b828cf27d80e2788c2eb"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2026-08-14T10:45:07.228914223Z"
+        },
+        "Descriptor": {
+            "mediaType": "application/vnd.oci.image.index.v1+json",
+            "digest": "sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15",
+            "size": 10293
+        },
+        "Identity": {
+            "Pull": [
+                {
+                    "Repository": "docker.io/library/postgres"
+                }
+            ]
+        }
+    }
+]
+
+=== .NET SDK 10 Image Inspection ===
+[
+    {
+        "Id": "sha256:e1fc6e423f543119c406d24e2e687d67c569f18f04a37a8b0005d80ad0dcee80",
+        "RepoTags": [
+            "mcr.microsoft.com/dotnet/sdk:10.0"
+        ],
+        "RepoDigests": [
+            "mcr.microsoft.com/dotnet/sdk@sha256:e1fc6e423f543119c406d24e2e687d67c569f18f04a37a8b0005d80ad0dcee80"
+        ],
+        "Comment": "buildkit.dockerfile.v0",
+        "Created": "2026-08-10T17:02:19.138484705Z",
+        "Config": {
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "APP_UID=1654",
+                "ASPNETCORE_HTTP_PORTS=8080",
+                "DOTNET_RUNNING_IN_CONTAINER=true",
+                "DOTNET_VERSION=10.0.11",
+                "ASPNET_VERSION=10.0.11",
+                "DOTNET_GENERATE_ASPNET_CERTIFICATE=false",
+                "DOTNET_NOLOGO=true",
+                "DOTNET_SDK_VERSION=10.0.400",
+                "DOTNET_USE_POLLING_FILE_WATCHER=true",
+                "NUGET_XMLDOC_MODE=skip",
+                "POWERSHELL_DISTRIBUTION_CHANNEL=PSDocker-DotnetSDK-Ubuntu-24.04"
+            ],
+            "Cmd": [
+                "/bin/bash"
+            ],
+            "Labels": {
+                "org.opencontainers.image.version": "24.04"
+            }
+        },
+        "Architecture": "amd64",
+        "Os": "linux",
+        "Size": 329751770,
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:42724e448bf499ec7d4b3c21d6cc68fe665ef677ed393c3dbb5357394e89ff91",
+                "sha256:73ba6d3f4de7e8b9304be6a52ea4399b6f44e6b2affbe9c355c75451051d614b",
+                "sha256:e9c940c8a4e9d921e3d22c845b5d2142c6c5006b1a817289c77b25c98daa36f9",
+                "sha256:296c0858796d1c1968d546989f664f7ed768ff1cb88294044bdc0e98a25e5b40",
+                "sha256:7549a21f8d5cc9f81124bfd91e6d49873b2ce50af70bafd8b633f4430191c68f",
+                "sha256:dc2b54fe89fafbda8822500388c3431fc4b92d5b16851f6d53b4dc2a6448b93c",
+                "sha256:cc51b78e874c9607676fe8d513b0136d7a41a8e810d395be4654da32244765e8",
+                "sha256:102073f959e84a2dd3af7cd9e7d9f581975469d3de9f965ba5038a0f0df97b22",
+                "sha256:3dccb2666cd4fd279ebdfe11706a33a89d6b2d2a6cfa24e4f1ad40fbcda5e107",
+                "sha256:6952aaa941c8266513e7f32ff170b3731c93dff036dfcd1d07055dcd467d29f9"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2026-08-14T10:44:52.164307925Z"
+        },
+        "Descriptor": {
+            "mediaType": "application/vnd.docker.distribution.manifest.list.v2+json",
+            "digest": "sha256:e1fc6e423f543119c406d24e2e687d67c569f18f04a37a8b0005d80ad0dcee80",
+            "size": 1079
+        },
+        "Identity": {
+            "Pull": [
+                {
+                    "Repository": "mcr.microsoft.com/dotnet/sdk"
+                }
+            ]
+        }
+    }
+]
+
+=== ASP.NET 10 Image Inspection ===
+[
+    {
+        "Id": "sha256:207cc51496778557731c81ff670333d8ade4a4fec22768fd1be8e78474a84ecf",
+        "RepoTags": [
+            "mcr.microsoft.com/dotnet/aspnet:10.0"
+        ],
+        "RepoDigests": [
+            "mcr.microsoft.com/dotnet/aspnet@sha256:207cc51496778557731c81ff670333d8ade4a4fec22768fd1be8e78474a84ecf"
+        ],
+        "Comment": "buildkit.dockerfile.v0",
+        "Created": "2026-08-10T17:01:15.238169197Z",
+        "Config": {
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "APP_UID=1654",
+                "ASPNETCORE_HTTP_PORTS=8080",
+                "DOTNET_RUNNING_IN_CONTAINER=true",
+                "DOTNET_VERSION=10.0.11",
+                "ASPNET_VERSION=10.0.11"
+            ],
+            "Cmd": [
+                "/bin/bash"
+            ],
+            "Labels": {
+                "org.opencontainers.image.version": "24.04"
+            }
+        },
+        "Architecture": "amd64",
+        "Os": "linux",
+        "Size": 98277011,
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:42724e448bf499ec7d4b3c21d6cc68fe665ef677ed393c3dbb5357394e89ff91",
+                "sha256:73ba6d3f4de7e8b9304be6a52ea4399b6f44e6b2affbe9c355c75451051d614b",
+                "sha256:e9c940c8a4e9d921e3d22c845b5d2142c6c5006b1a817289c77b25c98daa36f9",
+                "sha256:296c0858796d1c1968d546989f664f7ed768ff1cb88294044bdc0e98a25e5b40",
+                "sha256:7549a21f8d5cc9f81124bfd91e6d49873b2ce50af70bafd8b633f4430191c68f",
+                "sha256:dc2b54fe89fafbda8822500388c3431fc4b92d5b16851f6d53b4dc2a6448b93c"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2026-08-14T10:44:52.979421981Z"
+        },
+        "Descriptor": {
+            "mediaType": "application/vnd.docker.distribution.manifest.list.v2+json",
+            "digest": "sha256:207cc51496778557731c81ff670333d8ade4a4fec22768fd1be8e78474a84ecf",
+            "size": 1079
+        },
+        "Identity": {
+            "Pull": [
+                {
+                    "Repository": "mcr.microsoft.com/dotnet/aspnet"
+                }
+            ]
+        }
+    }
+]
+

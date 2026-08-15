@@ -1,0 +1,37 @@
+
+=== Running Gate: foundation-restore (BR001-R2.4) ===
+Profile: Full | Status: READY | Timeout: 60s
+Gate succeeded.
+
+=== Running Gate: foundation-format (BR001-R2.4) ===
+Profile: Full | Status: READY | Timeout: 30s
+Gate succeeded.
+
+=== Running Gate: foundation-build (BR001-R2.4) ===
+Profile: Full | Status: READY | Timeout: 120s
+Gate succeeded.
+
+=== Running Gate: foundation-openspec (BR001-R6.2) ===
+Profile: Full | Status: READY | Timeout: 30s
+Gate succeeded.
+
+=== Running Gate: foundation-hygiene (BR001-R2.4) ===
+Profile: Full | Status: READY | Timeout: 15s
+Gate succeeded.
+
+=== Running Gate: runtime-docker-compose (BR001-R4.4) ===
+Profile: Full | Status: READY | Timeout: 30s
+Gate succeeded.
+
+=== Running Gate: runtime-smoke-compose (BR001-R4.4) ===
+Profile: Full | Status: READY | Timeout: 180s
+Gate succeeded.
+
+=== Running Gate: runtime-smoke-aspire (BR001-R4.4) ===
+Profile: Full | Status: READY | Timeout: 180s
+Gate succeeded.
+
+=== Running Gate: runtime-unit-tests (BR001-R5.2) ===
+Profile: Full | Status: NOT_IMPLEMENTED | Timeout: 60s
+Gate is NOT_IMPLEMENTED. Failing fast.
+

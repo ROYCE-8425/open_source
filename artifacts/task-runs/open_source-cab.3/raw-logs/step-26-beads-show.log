@@ -1,0 +1,59 @@
+[
+  {
+    "id": "open_source-cab.3",
+    "title": "Prove DX-OS Engineering OS runtime spike",
+    "description": "BR001-R4: integrate stable Elsa NuGet, PostgreSQL, Aspire, API health, Compose, and an executable workflow smoke without Elsa source/project references.",
+    "acceptance_criteria": "Clean checkout starts via Compose and Aspire and passes executable workflow, database, health, and runtime smoke checks.",
+    "spec_id": "openspec/changes/bootstrap-remediation-001/tasks.md#br001-r4-engineering-runtime-spike",
+    "status": "in_progress",
+    "priority": 0,
+    "issue_type": "task",
+    "assignee": "ROYCE-8425",
+    "owner": "royce8425@github.com",
+    "created_at": "2026-08-11T05:55:47Z",
+    "created_by": "ROYCE-8425",
+    "updated_at": "2026-08-14T10:39:09Z",
+    "started_at": "2026-08-14T10:39:09Z",
+    "dependencies": [
+      {
+        "id": "open_source-cab",
+        "title": "DX-OS bootstrap remediation",
+        "description": "Resolve the accepted NOT_READY findings from docs/audits/BOOTSTRAP-AUDIT-001.md under the authoritative OpenSpec change bootstrap-remediation-001. OpenSpec defines the contract; Beads tracks execution.",
+        "acceptance_criteria": "A CLEAN CLONE / READY audit proves a public DX-OS-owned open-source repository, independent identity/history, approved OSS license, source-to-demo reproducibility without private source, dependency/attribution/SBOM/service disclosure, CI/release metadata, and every required quality/runtime gate.",
+        "spec_id": "openspec/changes/bootstrap-remediation-001/proposal.md",
+        "status": "open",
+        "priority": 0,
+        "issue_type": "epic",
+        "owner": "royce8425@github.com",
+        "created_at": "2026-08-11T05:55:44Z",
+        "created_by": "ROYCE-8425",
+        "updated_at": "2026-08-13T02:44:54Z",
+        "dependency_type": "parent-child"
+      },
+      {
+        "id": "open_source-cab.2",
+        "title": "Create minimal DX-OS build system",
+        "description": "BR001-R2: recreate DX-OS-owned .NET 10 SDK, CPM, feed, solution, project-boundary, ignore, and package metadata in the extracted repository; do not inherit Elsa build infrastructure.",
+        "acceptance_criteria": "Pinned .NET 10 configuration restores/builds DXOS.slnx from the extracted repository using only approved packages/feeds, and executable architecture checks prove the intended DX-OS project graph contains no Elsa source reference.",
+        "spec_id": "openspec/changes/bootstrap-remediation-001/tasks.md#br001-r2-minimal-dx-os-build-system",
+        "status": "closed",
+        "priority": 0,
+        "issue_type": "task",
+        "assignee": "ROYCE-8425",
+        "owner": "royce8425@github.com",
+        "created_at": "2026-08-11T05:55:46Z",
+        "created_by": "ROYCE-8425",
+        "updated_at": "2026-08-13T02:23:42Z",
+        "started_at": "2026-08-11T17:51:22Z",
+        "closed_at": "2026-08-13T02:23:42Z",
+        "close_reason": "Codex Re-review 12 PASS: SDK 10.0.302, exact nine-project graph, CPM/feed policy, nine stable locks, locked restore, warning-free Release build, hygiene, and evidence runner independently verified.",
+        "dependency_type": "blocks"
+      }
+    ],
+    "parent": "open_source-cab",
+    "dependent_count": 1,
+    "dependency_count": 2,
+    "comment_count": 0
+  }
+]
+

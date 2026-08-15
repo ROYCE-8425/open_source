@@ -108,6 +108,12 @@ function Get-LockSnapshot {
 
 $preLocks = Get-LockSnapshot
 
+$disposablePostgresSecret = $false
+if ([string]::IsNullOrWhiteSpace($env:POSTGRES_PASSWORD)) {
+    $env:POSTGRES_PASSWORD = [Guid]::NewGuid().ToString('N')
+    $disposablePostgresSecret = $true
+}
+
 $contractFullPath = Get-SafeChildPath $expectedRoot $ContractPath "Contract"
 if (-not (Test-Path $contractFullPath)) {
     throw "Missing contract file: $contractFullPath"
@@ -421,6 +427,9 @@ function Run-Gate {
 
         $content = "--- STDOUT ---`n" + $stdoutStr + "`n--- STDERR ---`n" + $stderrStr
         $content = $content -replace "SECRET_KEY=\w+", "SECRET_KEY=***REDACTED***"
+        if ($env:POSTGRES_PASSWORD) {
+            $content = $content -replace [regex]::Escape($env:POSTGRES_PASSWORD), "***REDACTED***"
+        }
         [IO.File]::WriteAllText($outFile, $content, [System.Text.Encoding]::UTF8)
         $gateEv.outputHash = (Get-FileHash -Path $outFile -Algorithm SHA256).Hash
 
@@ -484,6 +493,10 @@ $evidence.postLocks = $postLocks
 
 $evidence.endTime = (Get-Date).ToString("o")
 $evidence | ConvertTo-Json -Depth 10 | Set-Content -Path $evidenceFile -Encoding UTF8
+
+if ($disposablePostgresSecret) {
+    Remove-Item env:POSTGRES_PASSWORD -ErrorAction SilentlyContinue
+}
 
 if ($failed) { exit 1 }
 exit 0

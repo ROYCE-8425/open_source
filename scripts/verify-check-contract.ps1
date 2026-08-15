@@ -639,13 +639,16 @@ exit 0
     }
     Write-Host "[PASS] Output untruncated (complete 10,000 sequential lines verified), boundary sentinels confirmed, secrets redacted, stderr captured" -ForegroundColor Green
 
-    # Common expected 6 gates sequence for Runtime and Full
-    $expectedSixGates = @(
+    # Common expected 9 gates sequence for Runtime and Full
+    $expectedNineGates = @(
         @{ id = "foundation-restore"; exitCode = 0 },
         @{ id = "foundation-format"; exitCode = 0 },
         @{ id = "foundation-build"; exitCode = 0 },
         @{ id = "foundation-openspec"; exitCode = 0 },
         @{ id = "foundation-hygiene"; exitCode = 0 },
+        @{ id = "runtime-docker-compose"; exitCode = 0 },
+        @{ id = "runtime-smoke-compose"; exitCode = 0 },
+        @{ id = "runtime-smoke-aspire"; exitCode = 0 },
         @{ id = "runtime-unit-tests"; exitCode = 1 }
     )
 
@@ -672,13 +675,13 @@ exit 0
         throw "Assertion failed: Expected exactly 5 gates in Foundation profile, got $($foundEv.gates.Count))"
     }
     for ($i = 0; $i -lt 5; $i++) {
-        if ($foundEv.gates[$i].id -ne $expectedSixGates[$i].id -or $foundEv.gates[$i].exitCode -ne 0) {
+        if ($foundEv.gates[$i].id -ne $expectedNineGates[$i].id -or $foundEv.gates[$i].exitCode -ne 0) {
             throw "Assertion failed: Foundation gate [$i] mismatch ($($foundEv.gates[$i].id), exit=$($foundEv.gates[$i].exitCode))"
         }
     }
     Write-Host "[PASS] Real Foundation exit 0, overallResult PASS, exact 5 gates passed in order" -ForegroundColor Green
 
-    # 8. Real Runtime Profile (Exact 6 gates in order)
+    # 8. Real Runtime Profile (Exact 9 gates in order)
     $runtimeEvTestPath = Join-Path $verifierTemp "evidence-runtime-test.json"
     $runtimeEvTestRel = $runtimeEvTestPath.Substring($repoRoot.Length).TrimStart('\')
 
@@ -688,7 +691,7 @@ exit 0
         "-File", "scripts\check.ps1",
         "-Profile", "Runtime",
         "-EvidencePath", $runtimeEvTestRel
-    )
+    ) -TimeoutSeconds 300
     if ($resRuntime.ExitCode -ne 1) {
         throw "Assertion failed: Real Runtime profile should exit 1, got $($resRuntime.ExitCode)"
     }
@@ -697,20 +700,20 @@ exit 0
     if ($runtimeEv.overallResult -ne "FAIL" -or $runtimeEv.firstFailure -ne "runtime-unit-tests") {
         throw "Assertion failed: Runtime evidence failure mismatch (overallResult='$($runtimeEv.overallResult)', firstFailure='$($runtimeEv.firstFailure)')"
     }
-    if ($runtimeEv.gates.Count -ne 6) {
-        throw "Assertion failed: Runtime gate count is $($runtimeEv.gates.Count) (expected exactly 6)"
+    if ($runtimeEv.gates.Count -ne 9) {
+        throw "Assertion failed: Runtime gate count is $($runtimeEv.gates.Count) (expected exactly 9)"
     }
-    for ($i = 0; $i -lt 6; $i++) {
-        if ($runtimeEv.gates[$i].id -ne $expectedSixGates[$i].id) {
-            throw "Assertion failed: Runtime gate [$i] ID is '$($runtimeEv.gates[$i].id)' (expected '$($expectedSixGates[$i].id)')"
+    for ($i = 0; $i -lt 9; $i++) {
+        if ($runtimeEv.gates[$i].id -ne $expectedNineGates[$i].id) {
+            throw "Assertion failed: Runtime gate [$i] ID is '$($runtimeEv.gates[$i].id)' (expected '$($expectedNineGates[$i].id)')"
         }
-        if ($runtimeEv.gates[$i].exitCode -ne $expectedSixGates[$i].exitCode) {
-            throw "Assertion failed: Runtime gate [$i] exitCode is $($runtimeEv.gates[$i].exitCode) (expected $($expectedSixGates[$i].exitCode))"
+        if ($runtimeEv.gates[$i].exitCode -ne $expectedNineGates[$i].exitCode) {
+            throw "Assertion failed: Runtime gate [$i] exitCode is $($runtimeEv.gates[$i].exitCode) (expected $($expectedNineGates[$i].exitCode))"
         }
     }
-    Write-Host "[PASS] Real Runtime failure boundary: exact 6 gates in order, firstFailure at runtime-unit-tests (exit 1, overallResult FAIL)" -ForegroundColor Green
+    Write-Host "[PASS] Real Runtime failure boundary: exact 9 gates in order, firstFailure at runtime-unit-tests (exit 1, overallResult FAIL)" -ForegroundColor Green
 
-    # 9. Real Full Profile via Default Invocation (no -Profile) (Exact 6 gates in order)
+    # 9. Real Full Profile via Default Invocation (no -Profile) (Exact 9 gates in order)
     $fullEvTestPath = Join-Path $verifierTemp "evidence-full-test.json"
     $fullEvTestRel = $fullEvTestPath.Substring($repoRoot.Length).TrimStart('\')
 
@@ -719,7 +722,7 @@ exit 0
         "-ExecutionPolicy", "Bypass",
         "-File", "scripts\check.ps1",
         "-EvidencePath", $fullEvTestRel
-    )
+    ) -TimeoutSeconds 300
     if ($resFull.ExitCode -ne 1) {
         throw "Assertion failed: Real Full profile (default) should exit 1, got $($resFull.ExitCode)"
     }
@@ -731,18 +734,18 @@ exit 0
     if ($fullEv.overallResult -ne "FAIL" -or $fullEv.firstFailure -ne "runtime-unit-tests") {
         throw "Assertion failed: Full evidence failure mismatch (overallResult='$($fullEv.overallResult)', firstFailure='$($fullEv.firstFailure)')"
     }
-    if ($fullEv.gates.Count -ne 6) {
-        throw "Assertion failed: Full gate count is $($fullEv.gates.Count) (expected exactly 6)"
+    if ($fullEv.gates.Count -ne 9) {
+        throw "Assertion failed: Full gate count is $($fullEv.gates.Count) (expected exactly 9)"
     }
-    for ($i = 0; $i -lt 6; $i++) {
-        if ($fullEv.gates[$i].id -ne $expectedSixGates[$i].id) {
-            throw "Assertion failed: Full gate [$i] ID is '$($fullEv.gates[$i].id)' (expected '$($expectedSixGates[$i].id)')"
+    for ($i = 0; $i -lt 9; $i++) {
+        if ($fullEv.gates[$i].id -ne $expectedNineGates[$i].id) {
+            throw "Assertion failed: Full gate [$i] ID is '$($fullEv.gates[$i].id)' (expected '$($expectedNineGates[$i].id)')"
         }
-        if ($fullEv.gates[$i].exitCode -ne $expectedSixGates[$i].exitCode) {
-            throw "Assertion failed: Full gate [$i] exitCode is $($fullEv.gates[$i].exitCode) (expected $($expectedSixGates[$i].exitCode))"
+        if ($fullEv.gates[$i].exitCode -ne $expectedNineGates[$i].exitCode) {
+            throw "Assertion failed: Full gate [$i] exitCode is $($fullEv.gates[$i].exitCode) (expected $($expectedNineGates[$i].exitCode))"
         }
     }
-    Write-Host "[PASS] Real Full default profile failure boundary: exact 6 gates in order, firstFailure at runtime-unit-tests (exit 1, overallResult FAIL)" -ForegroundColor Green
+    Write-Host "[PASS] Real Full default profile failure boundary: exact 9 gates in order, firstFailure at runtime-unit-tests (exit 1, overallResult FAIL)" -ForegroundColor Green
 
     # 10. Immutability Verification: 9 Locks, Production Contract, and 6 Source Files
     $finalLockSnapshot = Get-StrictLockSnapshot

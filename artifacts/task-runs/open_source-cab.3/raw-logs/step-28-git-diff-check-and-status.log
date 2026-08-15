@@ -1,0 +1,76 @@
+
+ M Directory.Packages.props
+ M NuGet.Config
+ M scripts/check-contract.json
+ M scripts/check.ps1
+ M scripts/verify-check-contract.ps1
+ M src/DXOS.Api/DXOS.Api.csproj
+ M src/DXOS.Api/Program.cs
+ M src/DXOS.Api/packages.lock.json
+ M src/DXOS.AppHost/DXOS.AppHost.csproj
+ M src/DXOS.AppHost/Program.cs
+ M src/DXOS.AppHost/packages.lock.json
+ M src/DXOS.Infrastructure/DXOS.Infrastructure.csproj
+ M src/DXOS.Infrastructure/packages.lock.json
+ M src/DXOS.Workflows/DXOS.Workflows.csproj
+ M src/DXOS.Workflows/packages.lock.json
+ M tests/DXOS.Architecture.Tests/packages.lock.json
+ M tests/DXOS.Integration.Tests/packages.lock.json
+ M tests/DXOS.Unit.Tests/packages.lock.json
+?? .config/dotnet-tools.json
+?? .dockerignore
+?? .env.example
+?? Dockerfile
+?? artifacts/task-runs/open_source-cab.3/docker-comparison.json
+?? artifacts/task-runs/open_source-cab.3/docker-post-inventory.json
+?? artifacts/task-runs/open_source-cab.3/docker-pre-inventory.json
+?? artifacts/task-runs/open_source-cab.3/generate-hashes.ps1
+?? artifacts/task-runs/open_source-cab.3/implementation-report.md
+?? artifacts/task-runs/open_source-cab.3/package-and-license-delta.md
+?? artifacts/task-runs/open_source-cab.3/prompt.md
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-01-dotnet-version.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-02-nuget-sources.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-03-restore-locked-mode.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-04-format-whitespace-verify.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-05-build-release.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-06-list-packages-transitive.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-07-project-references.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-08-boundary-and-version-scan.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-09-ef-migrations-list.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-10-ef-database-update.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-11-postgres-live-probe.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-12-postgres-ready-probe.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-13-workflow-smoke-compose.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-14-postgres-negative-health.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-15-docker-compose-config-missing-secret.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-16-docker-compose-config-valid-secret.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-17-smoke-runtime-compose.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-18-smoke-runtime-aspire.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-19-image-inspect-digests.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-20-docker-resource-audit.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-21-verify-check-contract.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-22-check-profile-foundation.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-23-check-profile-runtime.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-24-check-profile-full.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-25-openspec-validate.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-26-beads-show.log
+?? artifacts/task-runs/open_source-cab.3/raw-logs/step-27-beads-dep-cycles.log
+?? artifacts/task-runs/open_source-cab.3/review.md
+?? artifacts/task-runs/open_source-cab.3/run-r4-verification.ps1
+?? artifacts/task-runs/open_source-cab.3/safety-test-results.json
+?? artifacts/task-runs/open_source-cab.3/safety-transcript.log
+?? artifacts/task-runs/open_source-cab.3/test-safety-contracts.ps1
+?? artifacts/task-runs/open_source-cab.3/verification.md
+?? compose.yaml
+?? docs/runtime.md
+?? scripts/smoke-runtime.ps1
+?? src/DXOS.AppHost/Properties/launchSettings.json
+?? src/DXOS.Infrastructure/Migrations/20260814104157_InitialBootstrap.Designer.cs
+?? src/DXOS.Infrastructure/Migrations/20260814104157_InitialBootstrap.cs
+?? src/DXOS.Infrastructure/Migrations/BootstrapDbContextModelSnapshot.cs
+?? src/DXOS.Infrastructure/Persistence/BootstrapDbContext.cs
+?? src/DXOS.Infrastructure/Persistence/BootstrapDbContextFactory.cs
+?? src/DXOS.Infrastructure/Persistence/Entities/RuntimeProbe.cs
+?? src/DXOS.Workflows/Smoke/EmitSmokeResultActivity.cs
+?? src/DXOS.Workflows/Smoke/EngineeringSmokeWorkflow.cs
+

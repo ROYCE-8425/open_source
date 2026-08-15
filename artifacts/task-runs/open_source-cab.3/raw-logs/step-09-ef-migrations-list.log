@@ -1,0 +1,7 @@
+Container ID: f707d61f4d1116171684feaab7c6fb494292f6266819458fea1f15c806bc562a
+Failed executing DbCommand (18ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+20260814104157_InitialBootstrap (Pending)
+

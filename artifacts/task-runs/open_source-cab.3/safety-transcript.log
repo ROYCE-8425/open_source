@@ -1,0 +1,39 @@
+============================================================
+Executing Mandatory Safety Contract Tests (Run ID: 4c110214c910)
+============================================================
+
+--- Safety Test 1 & 2: Process tree timeout & unrelated sentinel survival ---
+[PASS] Safety Test 1 (timeout-terminates-owned-process-tree)
+[PASS] Safety Test 2 (unrelated-process-survives-timeout)
+
+--- Safety Test 3, 4, 5: Real concurrent unrelated Docker resources survive Aspire cleanup ---
+[OK] Received snapshot-complete signal from smoke-runtime. Now creating concurrent unrelated sentinels...
+[OK] Aspire smoke completed successfully. Verifying concurrent sentinels survived...
+[PASS] Safety Test 3 (unrelated-container-survives-aspire-cleanup)
+[PASS] Safety Test 4 (unrelated-network-survives-aspire-cleanup)
+[PASS] Safety Test 5 (unrelated-volume-survives-aspire-cleanup)
+
+--- Safety Test 6: Migration container name collision protection ---
+[PASS] Safety Test 6 (migration-collision-preserves-existing-container)
+
+--- Safety Test 7: Forced cleanup failure fails closed ---
+[PASS] Safety Test 7 (cleanup-failure-fails-closed)
+
+--- Safety Test 8: Missing POSTGRES_PASSWORD fail-closed test ---
+[PASS] Safety Test 8 (compose-missing-secret-fails-closed)
+
+--- Safety Test 9: Generated secret non-disclosure ---
+[PASS] Safety Test 9 (generated-secret-never-disclosed)
+
+--- Safety Test 10: Zero task-owned residue after cleanup ---
+[PASS] Safety Test 10 (zero-current-run-docker-residue)
+
+--- Safety Test 11: Exact pre-existing Docker state preservation ---
+[PASS] Safety Test 11 (exact-pre-existing-docker-state-preserved)
+
+Wrote machine-readable safety results to: C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\artifacts\task-runs\open_source-cab.3\safety-test-results.json
+
+============================================================
+All 11 Mandatory Safety Contract Tests PASSED Successfully!
+============================================================
+

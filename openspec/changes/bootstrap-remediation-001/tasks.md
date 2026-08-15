@@ -128,7 +128,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
 
 **Beads mapping:** `open_source-cab.3` (all BR001-R4.x tasks). **Dependencies:** BR001-R2 PASS; may run in parallel with R3.
 
-- [ ] 4.1 **BR001-R4.1 Add approved runtime dependencies and composition boundaries.**
+- [x] 4.1 **BR001-R4.1 Add approved runtime dependencies and composition boundaries.**
   - **Objective:** Introduce stable Elsa/EF/Npgsql/Aspire packages only at their intended edges.
   - **Dependencies:** BR001-R2.
   - **Allowed scope:** CPM, `DXOS.Workflows`, `DXOS.Infrastructure`, `DXOS.Api`, `DXOS.AppHost` project references/composition.
@@ -138,7 +138,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Resolved dependency graph and license delta.
   - **Rollback notes:** Revert package/project changes; never replace failed packages with old source references.
 
-- [ ] 4.2 **BR001-R4.2 Implement PostgreSQL bootstrap persistence and health.**
+- [x] 4.2 **BR001-R4.2 Implement PostgreSQL bootstrap persistence and health.**
   - **Objective:** Prove migration-capable PostgreSQL access and real readiness without abstraction ceremony.
   - **Dependencies:** BR001-R4.1.
   - **Allowed scope:** Infrastructure `DbContext`, minimal bootstrap entity/migration needed only for engineering proof, API liveness/readiness composition and secret-safe config.
@@ -148,7 +148,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Migration list/result, health payload/status/exit, sanitized connection source.
   - **Rollback notes:** Revert bootstrap migration/code; preserve user data/volumes unless task-created disposable resources are explicitly identified.
 
-- [ ] 4.3 **BR001-R4.3 Implement deterministic Elsa workflow smoke.**
+- [x] 4.3 **BR001-R4.3 Implement deterministic Elsa workflow smoke.**
   - **Objective:** Start and complete a code-defined non-business workflow with observable identity/status/correlation.
   - **Dependencies:** BR001-R4.1–R4.2.
   - **Allowed scope:** Workflow definition/composition and automation-only smoke invocation/result surface.
@@ -158,7 +158,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Instance/status/output/correlation and both exit codes/log locations.
   - **Rollback notes:** Remove only smoke-specific code/config and leave package boundary coherent.
 
-- [ ] 4.4 **BR001-R4.4 Implement and prove Aspire and Compose paths.**
+- [x] 4.4 **BR001-R4.4 Implement and prove Aspire and Compose paths.**
   - **Objective:** Run the same API/PostgreSQL/workflow contract through independent developer and demo orchestration.
   - **Dependencies:** BR001-R4.2–R4.3.
   - **Allowed scope:** real AppHost, Dockerfiles, `compose.yaml`, bounded `scripts/smoke-runtime.ps1`, runtime docs.

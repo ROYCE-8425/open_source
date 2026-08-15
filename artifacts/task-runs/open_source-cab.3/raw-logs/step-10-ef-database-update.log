@@ -1,0 +1,16 @@
+Container ID: b1c45eab8178bacf0fdf68c85e965f950e15bedcd477602a8efc863e0651070d
+Failed executing DbCommand (17ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+Applying migration '20260814104157_InitialBootstrap'.
+Done.
+
+Table Verification Output:
+ count 
+-------
+     0
+(1 row)
+
+

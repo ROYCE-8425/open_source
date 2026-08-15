@@ -1,0 +1,18 @@
+Project: DXOS.Api.csproj
+  ProjectReferences: ..\DXOS.Application\DXOS.Application.csproj, ..\DXOS.Infrastructure\DXOS.Infrastructure.csproj, ..\DXOS.Workflows\DXOS.Workflows.csproj
+  PackageReferences: Microsoft.EntityFrameworkCore.Design
+Project: DXOS.AppHost.csproj
+  ProjectReferences: ..\DXOS.Api\DXOS.Api.csproj
+  PackageReferences: Aspire.Hosting.AppHost, Aspire.Hosting.PostgreSQL
+Project: DXOS.Application.csproj
+  ProjectReferences: ..\DXOS.Domain\DXOS.Domain.csproj
+  PackageReferences: 
+Project: DXOS.Domain.csproj
+  ProjectReferences: 
+  PackageReferences: 
+Project: DXOS.Infrastructure.csproj
+  ProjectReferences: ..\DXOS.Application\DXOS.Application.csproj, ..\DXOS.Domain\DXOS.Domain.csproj
+  PackageReferences: Microsoft.EntityFrameworkCore, Microsoft.EntityFrameworkCore.Design, Npgsql.EntityFrameworkCore.PostgreSQL
+Project: DXOS.Workflows.csproj
+  ProjectReferences: ..\DXOS.Application\DXOS.Application.csproj
+  PackageReferences: Elsa

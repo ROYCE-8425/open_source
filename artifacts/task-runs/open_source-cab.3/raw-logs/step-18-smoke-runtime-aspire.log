@@ -1,0 +1,35 @@
+============================================================
+DX-OS Runtime Smoke Runner
+Mode: Aspire | Run ID: 4be3e3026a30 | Project: dxos-smoke-4be3e3026a30
+Ports: API=18587, Postgres=16113
+============================================================
+==> Starting Aspire AppHost (dxos-smoke-4be3e3026a30)...
+==> Probing API Liveness: http://localhost:18587/health/live...
+[OK] Liveness OK: {"status":"Healthy","mode":"Liveness","timestamp":"2026-08-15T06:35:44.0944824+00:00"}
+==> Probing API Readiness: http://localhost:18587/health/ready...
+[OK] Readiness OK: {"status":"Healthy","mode":"Readiness","database":"Connected","probeCount":0,"timestamp":"2026-08-15T06:35:44.4590574+00:00"}
+  [Aspire Container b46a3a6dbed99cee7e3d15558de79c29f4a4defa29e687660b9bf2a23f9ea12c] Image: docker.io/postgres:18.4-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15 | RunLabel: 4be3e3026a30 | CreatorPID: 21228
+[OK] Aspire PostgreSQL image digest mechanically verified.
+==> Invoking Elsa Workflow Smoke: http://localhost:18587/smoke/workflow...
+[OK] Elsa Smoke Workflow Succeeded!
+  - Workflow Instance ID: 94b6f93b70ee93a8
+  - Terminal Status:      Finished (Finished)
+  - Output:               DXOS_SMOKE_OK
+  - Echoed Correlation:   smoke-corr-4be3e3026a30
+==> Cleaning up task-owned resources for run 4be3e3026a30...
+  -> Removing owned Aspire container b46a3a6dbed99cee7e3d15558de79c29f4a4defa29e687660b9bf2a23f9ea12c...
+
+Name                           Value                                                                                   
+----                           -----                                                                                   
+Stdout                         b46a3a6dbed99cee7e3d15558de79c29f4a4defa29e687660b9bf2a23f9ea12c...                     
+ExitCode                       0                                                                                       
+Stderr                                                                                                                 
+Stdout                         b46a3a6dbed99cee7e3d15558de79c29f4a4defa29e687660b9bf2a23f9ea12c...                     
+ExitCode                       0                                                                                       
+Stderr                                                                                                                 
+  -> Removing owned Aspire network 9f98b6f4b7ec86da5abbccc9a03be9b4ed3d5f977b58275d50fcf1a0744ee698 (aspire-session-network-bhncvanj-DXOS)...
+Stdout                         9f98b6f4b7ec86da5abbccc9a03be9b4ed3d5f977b58275d50fcf1a0744ee698...                     
+ExitCode                       0                                                                                       
+Stderr                                                                                                                 
+[OK] Runtime smoke completed successfully and all task-owned resources were cleaned up.
+
