@@ -1,0 +1,28 @@
+================================================================================
+STEP 3: Contract Verifier
+COMMAND: powershell scripts/verify-check-contract.ps1
+EXIT CODE: 0
+DURATION: 28.983s
+TIMESTAMP: 2026-08-15T20:20:44.9108600+00:00
+================================================================================
+--- STDOUT ---
+Running Verifier Assertions...
+[PASS] Missing tool preflight: non-zero exit, machine-readable evidence, blocked subsequent gates
+[PASS] Native exit code 42 recorded, overallResult FAIL, second gate short-circuited
+[PASS] Timeout execution bounded, process-tree terminated, no orphans, unrelated process survived
+[PASS] Argument boundaries survive with exact count, order, and values
+[PASS] Unrelated solution and non-root directory shielding verified
+[PASS] Output untruncated (10,000 sequential lines), secrets redacted
+[PASS] Real Foundation exit 0, overallResult PASS, exact 5 gates passed in order
+[PASS] Fail-fast mechanism verified: later success gate never executed after failure
+[PASS] Test runner mechanics fixtures (zero tests, missing report, malformed report) fail closed
+[PASS] Test helper security boundaries verified: ResultPath escapes, sibling paths, and unapproved projects rejected
+[PASS] Container teardown failure fixtures verified: stop failure, dispose fault, and dispose timeout fail closed
+[PASS] Production contract audit: exact 12 Runtime gates in deterministic order, E2E strictly NOT_APPLICABLE
+[PASS] Immutability of exactly 9 locks, production contract, and 6 source files proven
+
+All verifier assertions passed safely!
+
+--- STDERR ---
+
+================================================================================

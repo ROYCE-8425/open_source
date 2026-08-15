@@ -1,0 +1,19 @@
+================================================================================
+BR001-R5 CHILD VERIFICATION RUNNER EXECUTION RECORD
+================================================================================
+Run GUID: 8682f54269a9
+Evidence Directory: C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\artifacts\task-runs\open_source-cab.4\runs\8682f54269a9
+Child PID: 9428
+Child Command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File artifacts/task-runs/open_source-cab.4/run-r5-verification.ps1 -RunGuid 8682f54269a9
+Child Start: 2026-08-15T20:20:12.9060482+00:00
+Child End: 2026-08-15T20:22:07.6147077+00:00
+Child Wall Duration: 114.709s
+Child Exit Code: 0
+Child Result: PASS
+
+RETAINED CHILD STREAMS:
+1. child-stdout.log: 1298 bytes (SHA256: 0ead8eacc2611133c69543be6df2fc25d8d96728f912f545a1a1da291370903c)
+2. child-stderr.log: 0 bytes (SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855)
+================================================================================
+STATUS: CHILD_EXECUTION_COMPLETED
+================================================================================

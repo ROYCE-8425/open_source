@@ -172,7 +172,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
 
 **Beads mapping:** `open_source-cab.4` (all BR001-R5.x tasks). **Dependencies:** BR001-R3 PASS and BR001-R4 PASS.
 
-- [ ] 5.1 **BR001-R5.1 Migrate test runner and remove placeholders.**
+- [x] 5.1 **BR001-R5.1 Migrate test runner and remove placeholders.**
   - **Objective:** Establish xUnit v3/MTP projects that cannot report green with zero meaningful tests.
   - **Dependencies:** BR001-R3, BR001-R4.
   - **Allowed scope:** retained test project files, `global.json` test runner setting, CPM, removal of empty `UnitTest1` and E2E project.
@@ -182,7 +182,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Package/test discovery counts and E2E removal/N/A rationale.
   - **Rollback notes:** Revert runner migration if needed, but never restore placeholders as PASS evidence.
 
-- [ ] 5.2 **BR001-R5.2 Add unit and architecture rules.**
+- [x] 5.2 **BR001-R5.2 Add unit and architecture rules.**
   - **Objective:** Protect real R4 behavior and approved dependency/ceremony constraints.
   - **Dependencies:** BR001-R5.1.
   - **Allowed scope:** unit/architecture tests and ArchUnitNET 0.13.3 packages/references.
@@ -192,7 +192,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Test list/count, protected behavior/rules, deliberate negative result.
   - **Rollback notes:** Revert tests/package delta; leave workstream incomplete rather than replace with superficial assertions.
 
-- [ ] 5.3 **BR001-R5.3 Add real PostgreSQL and Elsa integration tests.**
+- [x] 5.3 **BR001-R5.3 Add real PostgreSQL and Elsa integration tests.**
   - **Objective:** Exercise migrations, persistence/readiness, and workflow completion on isolated PostgreSQL.
   - **Dependencies:** BR001-R5.1 and R4 runtime.
   - **Allowed scope:** integration fixtures/tests using Testcontainers.PostgreSql 4.13.0 and R4 public/composition boundaries.
@@ -202,7 +202,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Container image/digest, test count/duration, migration/DB/workflow correlation, cleanup result.
   - **Rollback notes:** Stop/remove only fixture-owned containers; revert integration files/packages without affecting user databases.
 
-- [ ] 5.4 **BR001-R5.4 Wire test suites into Runtime gate.**
+- [x] 5.4 **BR001-R5.4 Wire test suites into Runtime gate.**
   - **Objective:** Make suite selection/count/N/A semantics deterministic.
   - **Dependencies:** BR001-R5.1–R5.3.
   - **Allowed scope:** `scripts/check.ps1`, test result output/ignore/docs.

@@ -1,0 +1,32 @@
+================================================================================
+STEP 5: Foundation Quality Gate
+COMMAND: powershell scripts/check.ps1 -Profile Foundation
+EXIT CODE: 0
+DURATION: 10.442s
+TIMESTAMP: 2026-08-15T20:21:05.1410186+00:00
+================================================================================
+--- STDOUT ---
+
+=== Running Gate: foundation-restore (BR001-R2.4) ===
+Profile: Foundation | Status: READY | Timeout: 60s
+Gate succeeded.
+
+=== Running Gate: foundation-format (BR001-R2.4) ===
+Profile: Foundation | Status: READY | Timeout: 30s
+Gate succeeded.
+
+=== Running Gate: foundation-build (BR001-R2.4) ===
+Profile: Foundation | Status: READY | Timeout: 120s
+Gate succeeded.
+
+=== Running Gate: foundation-openspec (BR001-R6.2) ===
+Profile: Foundation | Status: READY | Timeout: 30s
+Gate succeeded.
+
+=== Running Gate: foundation-hygiene (BR001-R2.4) ===
+Profile: Foundation | Status: READY | Timeout: 15s
+Gate succeeded.
+
+--- STDERR ---
+
+================================================================================

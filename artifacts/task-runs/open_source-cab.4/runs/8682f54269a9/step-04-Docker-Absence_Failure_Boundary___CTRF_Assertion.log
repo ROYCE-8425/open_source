@@ -1,0 +1,15 @@
+================================================================================
+STEP 4: Docker-Absence Failure Boundary & CTRF Assertion
+COMMAND: dotnet test tests/DXOS.Integration.Tests/DXOS.Integration.Tests.csproj (with DOCKER_HOST=tcp://127.0.0.1:65534)
+EXIT CODE: 2
+DURATION: 9.787s
+TIMESTAMP: 2026-08-15T20:20:54.6860981+00:00
+================================================================================
+--- STDOUT ---
+Docker Absence Assertion:
+Exit Code: 2 (Expected non-zero)
+Negative CTRF Summary: Total=2, Passed=0, Failed=2, Skipped=0
+Connection failure diagnostic confirmed.
+--- STDERR ---
+
+================================================================================

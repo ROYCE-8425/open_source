@@ -209,7 +209,10 @@ foreach ($gateId in $selectedGateIds) {
     }
 
     foreach ($file in $gate.requiredFiles) { [void](Get-SafeChildPath $expectedRoot $file "Required File") }
-    foreach ($out in $gate.expectedOutputs) { [void](Get-SafeChildPath $expectedRoot $out "Expected Output") }
+    foreach ($out in $gate.expectedOutputs) {
+        $dummyOut = $out -replace '\{EvidenceDir\}', 'artifacts/quality-gate' -replace '\{EvidenceRoot\}', 'artifacts/quality-gate'
+        [void](Get-SafeChildPath $expectedRoot $dummyOut "Expected Output")
+    }
 
     $selectedGates += $gate
 }
@@ -368,11 +371,13 @@ function Run-Gate {
 
     $sw = [Diagnostics.Stopwatch]::StartNew()
 
+    $relEvidenceDir = $outDir.Substring($expectedRoot.Length).TrimStart('\', '/').Replace('\', '/')
     $argsArr = @()
     if ($Gate.arguments) {
         foreach ($a in $Gate.arguments) {
-            $gateEv.arguments += $a
-            $argsArr += (Escape-Argument $a)
+            $expandedA = $a -replace '\{EvidenceDir\}', $relEvidenceDir -replace '\{EvidenceRoot\}', $relEvidenceDir
+            $gateEv.arguments += $expandedA
+            $argsArr += (Escape-Argument $expandedA)
         }
     }
     $encodedArgs = $argsArr -join ' '
@@ -414,8 +419,24 @@ function Run-Gate {
         $stderrStr = ""
         for ($retry = 0; $retry -lt 5; $retry++) {
             try {
-                if (Test-Path $outTemp) { $stdoutStr = [IO.File]::ReadAllText($outTemp) }
-                if (Test-Path $errTemp) { $stderrStr = [IO.File]::ReadAllText($errTemp) }
+                if (Test-Path $outTemp) {
+                    $outBytes = [IO.File]::ReadAllBytes($outTemp)
+                    $utf8Candidate = [System.Text.Encoding]::UTF8.GetString($outBytes)
+                    if ($utf8Candidate.Contains([char]0xFFFD)) {
+                        $stdoutStr = [System.Text.Encoding]::Default.GetString($outBytes)
+                    } else {
+                        $stdoutStr = $utf8Candidate
+                    }
+                }
+                if (Test-Path $errTemp) {
+                    $errBytes = [IO.File]::ReadAllBytes($errTemp)
+                    $utf8Candidate = [System.Text.Encoding]::UTF8.GetString($errBytes)
+                    if ($utf8Candidate.Contains([char]0xFFFD)) {
+                        $stderrStr = [System.Text.Encoding]::Default.GetString($errBytes)
+                    } else {
+                        $stderrStr = $utf8Candidate
+                    }
+                }
                 break
             } catch {
                 if ($retry -eq 4) {
@@ -430,22 +451,29 @@ function Run-Gate {
         if ($env:POSTGRES_PASSWORD) {
             $content = $content -replace [regex]::Escape($env:POSTGRES_PASSWORD), "***REDACTED***"
         }
-        [IO.File]::WriteAllText($outFile, $content, [System.Text.Encoding]::UTF8)
+        $cleanLines = @()
+        foreach ($line in ($content -split "`r?`n")) {
+            $cleanLines += $line.TrimEnd()
+        }
+        $content = $cleanLines -join "`r`n"
+
+        [IO.File]::WriteAllText($outFile, $content, [System.Text.UTF8Encoding]::new($false))
         $gateEv.outputHash = (Get-FileHash -Path $outFile -Algorithm SHA256).Hash
 
         foreach ($out in $Gate.expectedOutputs) {
-            $expectedOutPath = Get-SafeChildPath $expectedRoot $out "Expected Output"
+            $expandedOut = $out -replace '\{EvidenceDir\}', $relEvidenceDir -replace '\{EvidenceRoot\}', $relEvidenceDir
+            $expectedOutPath = Get-SafeChildPath $expectedRoot $expandedOut "Expected Output"
             if (Test-Path $expectedOutPath) {
-                $gateEv.expectedOutputChecks[$out] = @{ exists = $true; hash = (Get-FileHash -Path $expectedOutPath -Algorithm SHA256).Hash }
+                $gateEv.expectedOutputChecks[$expandedOut] = @{ exists = $true; hash = (Get-FileHash -Path $expectedOutPath -Algorithm SHA256).Hash }
             } else {
-                $gateEv.expectedOutputChecks[$out] = @{ exists = $false }
+                $gateEv.expectedOutputChecks[$expandedOut] = @{ exists = $false }
             }
         }
     } catch {
         Write-Host "Failed to start process: $_" -ForegroundColor Red
         $gateEv.exitCode = -1
         $gateEv.error = $_.Exception.Message
-        [IO.File]::WriteAllText($outFile, $gateEv.error, [System.Text.Encoding]::UTF8)
+        [IO.File]::WriteAllText($outFile, $gateEv.error, [System.Text.UTF8Encoding]::new($false))
         $gateEv.outputHash = (Get-FileHash -Path $outFile -Algorithm SHA256).Hash
     } finally {
         $sw.Stop()

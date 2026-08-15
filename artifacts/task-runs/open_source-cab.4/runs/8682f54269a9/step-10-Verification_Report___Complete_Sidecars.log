@@ -1,0 +1,12 @@
+================================================================================
+STEP 10: Verification Report & Complete Sidecars
+COMMAND: Mechanically parse CTRF and evidence JSON, write verification.md, compute comprehensive SHA256 sidecars
+EXIT CODE: 0
+DURATION: 0.16s
+TIMESTAMP: 2026-08-15T20:22:07.4638093+00:00
+================================================================================
+--- STDOUT ---
+Generated verification.md, computed verification-output.sha256 and reports.sha256 in 0.16s.
+--- STDERR ---
+
+================================================================================

@@ -1,0 +1,23 @@
+================================================================================
+BR001-R5 FINALIZER ORDERING & ATOMIC PUBLICATION FIXTURE TRANSCRIPT
+================================================================================
+Literal Command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File artifacts/task-runs/open_source-cab.4/test-finalizer-ordering-fixture.ps1
+Start Time: 2026-08-15T20:19:40.0852093+00:00
+End Time: 2026-08-15T20:19:40.3220051+00:00
+Wall Duration: 0.237s
+Exit Code: 0
+Overall Result: PASS
+
+SCENARIO RESULTS:
+[PASS] Scenario 1 (Pre-publication failure): Validator error threw, completion dir absent, staging purged
+[PASS] Scenario 2 (Staging validation failure): Hygiene failure threw, completion dir absent, staging purged
+[PASS] Scenario 3 (Atomic publication collision): Destination collision threw, sentinel file byte-for-byte preserved, staging purged
+[PASS] Scenario 4 (Positive atomic publication): Staging cleanly moved to completion/, exactly 2 files present, sha256 matched, 0 staging residue
+
+PATH SAFETY & CLEANUP AUDIT:
+- Fixture Scratch Root: C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\artifacts\quality-gate/fixture-058a20971452
+- Full Path Chain Validated: YES (No reparse points, strict descendant of C:\Users\199X\OneDrive\Máy tính\olympic\dx-os\artifacts\quality-gate)
+- Residual Fixture Artifacts on Disk: 0 (Strictly purged and verified absent)
+================================================================================
+FIXTURE VERDICT: ALL_SCENARIOS_PASSED
+================================================================================

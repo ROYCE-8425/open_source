@@ -1,0 +1,17 @@
+================================================================================
+STEP 1: Environment Preflight & Baseline Inventories
+COMMAND: dotnet --version && git rev-parse HEAD && docker inventories && lock snapshot
+EXIT CODE: 0
+DURATION: 0.761s
+TIMESTAMP: 2026-08-15T20:20:13.9373825+00:00
+================================================================================
+--- STDOUT ---
+Dotnet SDK: 10.0.302
+Git HEAD: 1fe1af3791d4b282351256f6c2c33bab8f5351c5
+Baseline Containers: 295 chars
+Baseline Networks: 274 chars
+Baseline Volumes: 1282 chars
+All 9 lock files verified.
+--- STDERR ---
+
+================================================================================
