@@ -216,7 +216,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
 
 **Beads mapping:** `open_source-cab.5` (all BR001-R6.x tasks). **Dependencies:** BR001-R5 PASS.
 
-- [ ] 6.1 **BR001-R6.1 Recreate DX-OS agent instructions.**
+- [x] 6.1 **BR001-R6.1 Recreate DX-OS agent instructions.**
   - **Objective:** Let a fresh agent resolve product, authority, architecture, safety, and workflow without Elsa repository guidance.
   - **Dependencies:** BR001-R5.
   - **Allowed scope:** root `AGENTS.md`, `.agents/rules/**`, approved project skill pointers, encoding cleanup.
@@ -226,7 +226,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Instruction inventory, encoding result, authority/path walkthrough.
   - **Rollback notes:** Restore last accepted DX-OS guidance, never old Elsa root instructions.
 
-- [ ] 6.2 **BR001-R6.2 Validate OpenSpec, Beads mappings, and bootstrap ADRs.**
+- [x] 6.2 **BR001-R6.2 Validate OpenSpec, Beads mappings, and bootstrap ADRs.**
   - **Objective:** Align durable contract, execution graph, and architecture memory.
   - **Dependencies:** BR001-R6.1.
   - **Allowed scope:** `openspec/**`, Beads spec links/dependencies/export, bootstrap ADRs.
@@ -236,7 +236,7 @@ OpenSpec defines the implementation contract below. Beads epic `open_source-cab`
   - **Required evidence:** Validation output, graph/mapping table, ADR index.
   - **Rollback notes:** Restore OpenSpec from Git and Beads from native backup/export; preserve accepted evidence.
 
-- [ ] 6.3 **BR001-R6.3 Establish project state and evidence index.**
+- [x] 6.3 **BR001-R6.3 Establish project state and evidence index.**
   - **Objective:** Record only independently accepted engineering truth and next execution state.
   - **Dependencies:** BR001-R6.1–R6.2 and R1–R5 PASS reports.
   - **Allowed scope:** `docs/PROJECT_STATE.md`, evidence index/template, `walkthrough.md` only if evidence-backed.

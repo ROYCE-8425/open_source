@@ -1,51 +1,28 @@
-# SOURCE OF TRUTH ORDER
+# Authority Hierarchy
 
-1. Accepted OpenSpec specification
-2. Architecture Decision Records
-3. Business Rules
-4. Beads task acceptance criteria
-5. Workspace Rules
-6. Project Skills
-7. Existing code patterns
-8. Model assumptions
+1. Current User Instruction
+2. DX-OS Constitution (.specify/memory/constitution.md)
+3. Accepted OpenSpec Contracts (openspec/)
+4. Architecture Decision Records (docs/adr/)
+5. Business Rules
+6. Beads Task Acceptance Criteria (bd)
+7. Workspace Rules & Repository Instructions (.agents/rules/, AGENTS.md)
+8. Implementation Artifacts & Reports (artifacts/task-runs/)
+9. Model Assumptions / Chat Transcripts
 
-If two sources conflict:
-STOP and report the conflict.
-Do not silently choose.
+If two sources at the same or higher level conflict:
+- Stop immediately.
+- Report the conflict explicitly.
+- Do not silently choose an outcome.
 
-## Roles
-**Codex OWNS:**
-- OpenSpec
-- Architecture
-- ADR
-- Beads decomposition
-- Acceptance Criteria
-- Security design
-- Review
-- Final verdict
+## Role Boundaries
 
-**Gemini OWNS:**
-- Implementation
-- Tests
-- Migration
-- Local verification
-- Bug fixes
-- Implementation evidence
+**Codex (Reviewer):**
+- Inspects OpenSpec contracts, architecture, ADRs, Beads decomposition, and acceptance criteria.
+- Conducts independent verification of git diffs, build outputs, test results, security reports, and runtime traces.
+- Issues final PASS or FIX_REQUIRED verdict.
 
-**Gemini KHÔNG du?c (MUST NOT):**
-- approve own implementation
-- silently change spec
-- silently install NuGet/npm package
-- remove failing test
-- weaken architecture rule
-- disable security scanner
-- merge main
-
-**Codex KHÔNG review l?i k? c?a Gemini:**
-Codex review:
-- git diff
-- test result
-- build result
-- security output
-- runtime traces
-Không review: 'Gemini nói là dã hoàn thành.'
+**Gemini (Implementer):**
+- Claims assigned Beads tasks and implements scoped code/test changes.
+- Executes local verification gates and records structured evidence.
+- Must NOT approve own implementation, mark OpenSpec checkboxes, close Beads issues, or commit/merge without Codex PASS.
