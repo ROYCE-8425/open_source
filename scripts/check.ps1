@@ -453,7 +453,18 @@ function Run-Gate {
             $execFile = $resolvedTools[$Gate.command].Path
         }
 
-        $proc = Start-Process -FilePath $execFile -ArgumentList $encodedArgs -WindowStyle Hidden -PassThru -RedirectStandardOutput $outTemp -RedirectStandardError $errTemp
+        $isWin = $IsWindows -or ($env:OS -eq "Windows_NT")
+        $startParams = @{
+            FilePath = $execFile
+            ArgumentList = $encodedArgs
+            PassThru = $true
+            RedirectStandardOutput = $outTemp
+            RedirectStandardError = $errTemp
+        }
+        if ($isWin) {
+            $startParams["WindowStyle"] = "Hidden"
+        }
+        $proc = Start-Process @startParams
 
         try {
             $proc | Wait-Process -Timeout $Gate.timeoutSeconds -ErrorAction Stop
@@ -464,13 +475,15 @@ function Run-Gate {
             $gateEv.exitCode = -1
             $gateEv.error = "TIMEOUT"
             if ($null -ne $proc -and -not $proc.HasExited) {
-                try {
-                    $killProc = Start-Process -FilePath "taskkill.exe" -ArgumentList "/T", "/F", "/PID", "$($proc.Id)" -WindowStyle Hidden -PassThru -ErrorAction SilentlyContinue
-                    if ($null -ne $killProc) {
-                        try { [void]$killProc.WaitForExit(5000) } catch {}
-                        $killProc.Dispose()
-                    }
-                } catch {}
+                if ($isWin) {
+                    try {
+                        $killProc = Start-Process -FilePath "taskkill.exe" -ArgumentList "/T", "/F", "/PID", "$($proc.Id)" -WindowStyle Hidden -PassThru -ErrorAction SilentlyContinue
+                        if ($null -ne $killProc) {
+                            try { [void]$killProc.WaitForExit(5000) } catch {}
+                            $killProc.Dispose()
+                        }
+                    } catch {}
+                }
                 $proc | Stop-Process -Force -ErrorAction SilentlyContinue
             }
             # Wait for the killed process to fully release file handles

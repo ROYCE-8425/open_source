@@ -174,7 +174,16 @@ if (-not [string]::IsNullOrWhiteSpace($ResultPath)) {
 $procArgs = "test `"$fullProjectPath`" -c Release --no-build --no-restore -- --report-ctrf --report-ctrf-filename `"$ctrfReportName`""
 Write-Host "Executing test runner: dotnet $procArgs"
 
-$proc = Start-Process -FilePath "dotnet" -ArgumentList $procArgs -WindowStyle Hidden -PassThru
+$isWin = $IsWindows -or ($env:OS -eq "Windows_NT")
+$startParams = @{
+    FilePath = "dotnet"
+    ArgumentList = $procArgs
+    PassThru = $true
+}
+if ($isWin) {
+    $startParams["WindowStyle"] = "Hidden"
+}
+$proc = Start-Process @startParams
 
 $timedOut = $false
 try {
@@ -183,16 +192,17 @@ try {
     $timedOut = $true
     Write-Host "Test execution timed out after $TimeoutSeconds seconds." -ForegroundColor Red
     if ($null -ne $proc -and -not $proc.HasExited) {
-        $killProc = Start-Process -FilePath "taskkill.exe" -ArgumentList "/T", "/F", "/PID", "$($proc.Id)" -WindowStyle Hidden -PassThru
-        if ($null -ne $killProc) {
-            [void]$killProc.WaitForExit(10000)
-            if ($killProc.ExitCode -ne 0 -and $killProc.ExitCode -ne 128) {
-                Write-Error "taskkill failed with exit code $($killProc.ExitCode)"
-            }
-            $killProc.Dispose()
+        if ($isWin) {
+            try {
+                $killProc = Start-Process -FilePath "taskkill.exe" -ArgumentList "/T", "/F", "/PID", "$($proc.Id)" -WindowStyle Hidden -PassThru -ErrorAction SilentlyContinue
+                if ($null -ne $killProc) {
+                    try { [void]$killProc.WaitForExit(10000) } catch {}
+                    $killProc.Dispose()
+                }
+            } catch {}
         }
         if (-not $proc.HasExited) {
-            $proc.Kill()
+            $proc | Stop-Process -Force -ErrorAction SilentlyContinue
         }
     }
 }
