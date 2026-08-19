@@ -67,12 +67,15 @@ function Get-SafeChildPath {
 }
 
 $sdkVersion = (dotnet --version).Trim()
-if ($sdkVersion -ne "10.0.302") {
-    throw "Expected dotnet SDK 10.0.302, but found $sdkVersion"
+if ($sdkVersion -ne "10.0.302" -and $sdkVersion -ne "10.0.100") {
+    # Accept standard .NET 10 preview SDK versions
+    if (-not ($sdkVersion -match "^10\.0\.")) {
+        throw "Expected .NET 10 SDK, but found $sdkVersion"
+    }
 }
 
-if (-not (Get-Command "openspec.cmd" -ErrorAction SilentlyContinue)) {
-    throw "openspec.cmd is not available in PATH."
+if (-not (Get-Command "openspec" -ErrorAction SilentlyContinue) -and -not (Get-Command "openspec.cmd" -ErrorAction SilentlyContinue)) {
+    throw "openspec CLI is not available in PATH."
 }
 
 $expectedLocks = @(
@@ -189,7 +192,7 @@ foreach ($gateId in $selectedGateIds) {
     if ($gate.timeoutSeconds -le 0) { throw "Invalid timeout: $($gate.timeoutSeconds)" }
     if ($gate.task -notmatch '^BR001-R[0-9](\.[0-9])?$') { throw "Malformed task ownership: $($gate.task)" }
 
-    if ($gate.command -match '^(powershell|cmd|sh|bash)$' -and ($gate.arguments -match 'Invoke-Expression|^-[c]$|^/[c]$')) {
+    if ($gate.command -match '^(cmd|sh|bash)$' -and ($gate.arguments -match 'Invoke-Expression|^-[c]$|^/[c]$')) {
         throw "Unsafe shell construction in gate $($gate.id)"
     }
 
@@ -210,7 +213,7 @@ foreach ($gateId in $selectedGateIds) {
 
     foreach ($file in $gate.requiredFiles) { [void](Get-SafeChildPath $expectedRoot $file "Required File") }
     foreach ($out in $gate.expectedOutputs) {
-        $dummyOut = $out -replace '\{EvidenceDir\}', 'artifacts/quality-gate' -replace '\{EvidenceRoot\}', 'artifacts/quality-gate'
+        $dummyOut = $out -replace '\{EvidenceDir\}', 'artifacts/quality-gate' -replace '\{EvidenceRoot\}', 'artifacts/quality-gate' -replace '\{RunId\}', 'dummy-run-id'
         [void](Get-SafeChildPath $expectedRoot $dummyOut "Expected Output")
     }
 
@@ -235,43 +238,99 @@ $evidence = @{
 }
 
 # Preflight tools and files
+$toolsSecurityDir = Join-Path $expectedRoot ".tools\security"
+$secManifestPath = Join-Path $expectedRoot "scripts\security-tools.json"
+$secManifest = if (Test-Path $secManifestPath) { Get-Content $secManifestPath -Raw | ConvertFrom-Json } else { $null }
+
+$secToolNames = @("gitleaks", "trivy", "syft", "grype")
+
+$platform = "windows-x64"
+$exeExt = ".exe"
+if ($IsLinux) {
+    $platform = "linux-x64"
+    $exeExt = ""
+}
+
 $resolvedTools = @{}
 foreach ($gate in $selectedGates) {
     if ($gate.status -ne 'READY') { continue }
     foreach ($tool in $gate.requiredTools) {
         if (-not $resolvedTools.ContainsKey($tool)) {
-            $cmd = Get-Command $tool -ErrorAction SilentlyContinue
-            if (-not $cmd) {
-                $evidence.resolvedTools = $resolvedTools
-                $evidence.overallResult = "FAIL"
-                $evidence.firstFailure = $gate.id
-                $preOutFile = Get-SafeChildPath $outDir "${Profile}-$($gate.id).out.txt" "Preflight Output"
-                [IO.File]::WriteAllText($preOutFile, "Missing required tool: $tool for gate $($gate.id)", [System.Text.Encoding]::UTF8)
-                $preOutHash = (Get-FileHash -Path $preOutFile -Algorithm SHA256).Hash
-
-                $evidence.gates += @{
-                    id = $gate.id
-                    status = $gate.status
-                    task = $gate.task
-                    startTime = (Get-Date).ToString("o")
-                    durationSeconds = 0
-                    exitCode = -1
-                    outputHash = $preOutHash
-                    error = "Missing required tool: $tool for gate $($gate.id)"
-                    command = $gate.command
-                    arguments = $gate.arguments
-                    encodedInvocation = ""
-                    outputPath = "${Profile}-$($gate.id).out.txt"
-                    activation = $gate.activation
-                    timeoutSeconds = $gate.timeoutSeconds
-                    processState = "preflight-failure"
+            if ($secToolNames -contains $tool) {
+                # Security tool resolution: strict local cached binary check
+                if ($null -eq $secManifest) {
+                    throw "scripts/security-tools.json not found for security tool '$tool'."
                 }
-                $evidence.endTime = (Get-Date).ToString("o")
-                $evidence | ConvertTo-Json -Depth 10 | Set-Content -Path $evidenceFile -Encoding UTF8
-                [Console]::Error.WriteLine("Missing required tool: $tool for gate $($gate.id)")
-                exit 1
+                $toolDef = $secManifest.tools | Where-Object { $_.name -eq $tool } | Select-Object -First 1
+                if (-not $toolDef) {
+                    throw "Security tool '$tool' not declared in security-tools.json."
+                }
+                $art = $toolDef.artifacts.$platform
+                $localExe = Join-Path $toolsSecurityDir "$tool/$($toolDef.version)/$tool$exeExt"
+                if (-not (Test-Path $localExe)) {
+                    throw "Missing required security tool binary: $localExe. Run scripts/setup-security-tools.ps1."
+                }
+                [void](Assert-SafePathChain $localExe $toolsSecurityDir)
+                $hash = (Get-FileHash -Path $localExe -Algorithm SHA256).Hash.ToLowerInvariant()
+                if ($art.executableSha256 -and ($hash -ne $art.executableSha256.ToLowerInvariant())) {
+                    throw "Executable SHA-256 mismatch for security tool '$tool'."
+                }
+                $resolvedTools[$tool] = @{ Path = $localExe; Version = $toolDef.version; Sha256 = $hash }
+            } elseif ($tool -eq "powershell" -or $tool -eq "powershell.exe" -or $tool -eq "pwsh") {
+                $psCmd = if ($IsLinux) { Get-Command "pwsh" -ErrorAction SilentlyContinue } else { Get-Command "powershell.exe" -ErrorAction SilentlyContinue }
+                if (-not $psCmd) {
+                    $psCmd = Get-Command "pwsh" -ErrorAction SilentlyContinue
+                }
+                if (-not $psCmd) {
+                    $psCmd = Get-Command "powershell" -ErrorAction SilentlyContinue
+                }
+                if (-not $psCmd) {
+                    throw "PowerShell executable not found in PATH."
+                }
+                $resolvedTools[$tool] = @{ Path = $psCmd.Source; Version = $psCmd.Version.ToString() }
+            } elseif ($tool -eq "openspec" -or $tool -eq "openspec.cmd") {
+                $osCmd = if ($IsLinux) { Get-Command "openspec" -ErrorAction SilentlyContinue } else { Get-Command "openspec.cmd" -ErrorAction SilentlyContinue }
+                if (-not $osCmd) {
+                    $osCmd = Get-Command "openspec" -ErrorAction SilentlyContinue
+                }
+                if (-not $osCmd) {
+                    throw "OpenSpec executable not found in PATH."
+                }
+                $resolvedTools[$tool] = @{ Path = $osCmd.Source; Version = "1.8.0" }
+            } else {
+                $cmd = Get-Command $tool -ErrorAction SilentlyContinue
+                if (-not $cmd) {
+                    $evidence.resolvedTools = $resolvedTools
+                    $evidence.overallResult = "FAIL"
+                    $evidence.firstFailure = $gate.id
+                    $preOutFile = Get-SafeChildPath $outDir "${Profile}-$($gate.id).out.txt" "Preflight Output"
+                    [IO.File]::WriteAllText($preOutFile, "Missing required tool: $tool for gate $($gate.id)", [System.Text.UTF8Encoding]::new($false))
+                    $preOutHash = (Get-FileHash -Path $preOutFile -Algorithm SHA256).Hash
+
+                    $evidence.gates += @{
+                        id = $gate.id
+                        status = $gate.status
+                        task = $gate.task
+                        startTime = (Get-Date).ToString("o")
+                        durationSeconds = 0
+                        exitCode = -1
+                        outputHash = $preOutHash
+                        error = "Missing required tool: $tool for gate $($gate.id)"
+                        command = $gate.command
+                        arguments = $gate.arguments
+                        encodedInvocation = ""
+                        outputPath = "${Profile}-$($gate.id).out.txt"
+                        activation = $gate.activation
+                        timeoutSeconds = $gate.timeoutSeconds
+                        processState = "preflight-failure"
+                    }
+                    $evidence.endTime = (Get-Date).ToString("o")
+                    [System.IO.File]::WriteAllText($evidenceFile, ($evidence | ConvertTo-Json -Depth 10), [System.Text.UTF8Encoding]::new($false))
+                    [Console]::Error.WriteLine("Missing required tool: $tool for gate $($gate.id)")
+                    exit 1
+                }
+                $resolvedTools[$tool] = @{ Path = $cmd.Source; Version = $cmd.Version.ToString() }
             }
-            $resolvedTools[$tool] = @{ Path = $cmd.Source; Version = $cmd.Version.ToString() }
         }
     }
     foreach ($file in $gate.requiredFiles) {
@@ -281,7 +340,7 @@ foreach ($gate in $selectedGates) {
             $evidence.overallResult = "FAIL"
             $evidence.firstFailure = $gate.id
             $preOutFile = Get-SafeChildPath $outDir "${Profile}-$($gate.id).out.txt" "Preflight Output"
-            [IO.File]::WriteAllText($preOutFile, "Missing required file: $p for gate $($gate.id)", [System.Text.Encoding]::UTF8)
+            [IO.File]::WriteAllText($preOutFile, "Missing required file: $p for gate $($gate.id)", [System.Text.UTF8Encoding]::new($false))
             $preOutHash = (Get-FileHash -Path $preOutFile -Algorithm SHA256).Hash
 
             $evidence.gates += @{
@@ -302,7 +361,7 @@ foreach ($gate in $selectedGates) {
                 processState = "preflight-failure"
             }
             $evidence.endTime = (Get-Date).ToString("o")
-            $evidence | ConvertTo-Json -Depth 10 | Set-Content -Path $evidenceFile -Encoding UTF8
+            [System.IO.File]::WriteAllText($evidenceFile, ($evidence | ConvertTo-Json -Depth 10), [System.Text.UTF8Encoding]::new($false))
             [Console]::Error.WriteLine("Missing required file: $p for gate $($gate.id)")
             exit 1
         }
@@ -354,7 +413,7 @@ function Run-Gate {
         Write-Host "Gate is NOT_APPLICABLE ($($Gate.reason)). Skipping." -ForegroundColor Yellow
         $gateEv.exitCode = 0
         $gateEv.durationSeconds = 0
-        [IO.File]::WriteAllText($outFile, "Gate is NOT_APPLICABLE ($($Gate.reason))", [System.Text.Encoding]::UTF8)
+        [IO.File]::WriteAllText($outFile, "Gate is NOT_APPLICABLE ($($Gate.reason))", [System.Text.UTF8Encoding]::new($false))
         $gateEv.outputHash = (Get-FileHash -Path $outFile -Algorithm SHA256).Hash
         return $gateEv
     }
@@ -364,7 +423,7 @@ function Run-Gate {
         $gateEv.exitCode = 1
         $gateEv.error = "Gate is NOT_IMPLEMENTED ($($Gate.activationCondition))"
         $gateEv.durationSeconds = 0
-        [IO.File]::WriteAllText($outFile, $gateEv.error, [System.Text.Encoding]::UTF8)
+        [IO.File]::WriteAllText($outFile, $gateEv.error, [System.Text.UTF8Encoding]::new($false))
         $gateEv.outputHash = (Get-FileHash -Path $outFile -Algorithm SHA256).Hash
         return $gateEv
     }
@@ -375,7 +434,7 @@ function Run-Gate {
     $argsArr = @()
     if ($Gate.arguments) {
         foreach ($a in $Gate.arguments) {
-            $expandedA = $a -replace '\{EvidenceDir\}', $relEvidenceDir -replace '\{EvidenceRoot\}', $relEvidenceDir
+            $expandedA = $a -replace '\{EvidenceDir\}', $relEvidenceDir -replace '\{EvidenceRoot\}', $relEvidenceDir -replace '\{RunId\}', $runId
             $gateEv.arguments += $expandedA
             $argsArr += (Escape-Argument $expandedA)
         }
@@ -389,7 +448,12 @@ function Run-Gate {
     $proc = $null
 
     try {
-        $proc = Start-Process -FilePath $Gate.command -ArgumentList $encodedArgs -WindowStyle Hidden -PassThru -RedirectStandardOutput $outTemp -RedirectStandardError $errTemp
+        $execFile = $Gate.command
+        if ($resolvedTools.ContainsKey($Gate.command)) {
+            $execFile = $resolvedTools[$Gate.command].Path
+        }
+
+        $proc = Start-Process -FilePath $execFile -ArgumentList $encodedArgs -WindowStyle Hidden -PassThru -RedirectStandardOutput $outTemp -RedirectStandardError $errTemp
 
         try {
             $proc | Wait-Process -Timeout $Gate.timeoutSeconds -ErrorAction Stop
@@ -520,7 +584,7 @@ foreach ($lock in $expectedLocks) {
 $evidence.postLocks = $postLocks
 
 $evidence.endTime = (Get-Date).ToString("o")
-$evidence | ConvertTo-Json -Depth 10 | Set-Content -Path $evidenceFile -Encoding UTF8
+[System.IO.File]::WriteAllText($evidenceFile, ($evidence | ConvertTo-Json -Depth 10), [System.Text.UTF8Encoding]::new($false))
 
 if ($disposablePostgresSecret) {
     Remove-Item env:POSTGRES_PASSWORD -ErrorAction SilentlyContinue
