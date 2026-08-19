@@ -21,7 +21,7 @@
           "sha256": "79a3ab579b53f71efd634f3aaf7e04a0fa0cf206b7ed434638d1547a2470a66e",
           "archiveType": "tar.gz",
           "executable": "gitleaks",
-          "executableSha256": "c269faaf7a6c9d06a4b7a1599335f6ea5c91be86df11100aa746a51d954e7d97",
+          "executableSha256": "8b6fd684fcd5b4ebe39b68abb072ce59e1063ce7ed4abd556157697845f1f088",
           "cacheRelativePath": "gitleaks/8.30.0/gitleaks"
         }
       }
@@ -46,7 +46,7 @@
           "sha256": "bbb64b9695866ce4a7a8f5c9592002c5961cab378577fa3f8a040df362b9b2ea",
           "archiveType": "tar.gz",
           "executable": "trivy",
-          "executableSha256": "5cf0dcf259ecdd45f7c32bf28bfa17c093a388f6fdf3965d1d6a782b1db1eb4d",
+          "executableSha256": "0e69edd134a3c338baa1a6806920773615d682b18cbc6a0cba2a3b658ef9b63e",
           "cacheRelativePath": "trivy/0.72.0/trivy"
         }
       }
@@ -71,7 +71,7 @@
           "sha256": "bf7b29ff57f06da30918266a0e1c2885a8f99784798d1bdb1628886aa015d788",
           "archiveType": "tar.gz",
           "executable": "syft",
-          "executableSha256": "a3f5a2f58be78bc1463132e0e01476db8d7d4f9b2d8e4eaeb16e3c03848b8dc5",
+          "executableSha256": "22f2b95baf524d45ad16b0ad5cdeb200c4b8a816493768cec50e4682b1f24b0e",
           "cacheRelativePath": "syft/1.50.0/syft"
         }
       }
@@ -96,7 +96,7 @@
           "sha256": "0122df7b655981abe547ad3d2190d65551dac6a2bfc80b4dc2a989b5d0587458",
           "archiveType": "tar.gz",
           "executable": "grype",
-          "executableSha256": "1f7e0da9b6a18d1a1b1fbdb36c64188f5538aa39b235ad625a6f253a69a4891b",
+          "executableSha256": "a8fff88f37a08af6a536e162f37f9902ec94af03df9928ee6295dffe7044dc43",
           "cacheRelativePath": "grype/0.116.1/grype"
         }
       }
