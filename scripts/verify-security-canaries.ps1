@@ -191,11 +191,12 @@ try {
         throw "Syft canary failed: SBOM file was not generated."
     }
     $syftJson = Get-Content $syftReport -Raw | ConvertFrom-Json
-    if ($syftJson.bomFormat -ne "CycloneDX" -or -not $syftJson.components -or $syftJson.components.Count -ne 2) {
-        throw "Syft canary failed: invalid CycloneDX output or component count mismatch (expected 2, got $($syftJson.components.Count))."
+    $compNamesList = @($syftJson.components | ForEach-Object { $_.name })
+    if ($syftJson.bomFormat -ne "CycloneDX" -or -not $syftJson.components -or $syftJson.components.Count -lt 2 -or -not ($compNamesList -contains "requests") -or -not ($compNamesList -contains "urllib3")) {
+        throw "Syft canary failed: invalid CycloneDX output or component mismatch (expected requests and urllib3, got $($compNamesList -join ', '))."
     }
-    $compNames = ($syftJson.components | ForEach-Object { $_.name }) -join ', '
-    Write-Host "PASS: Syft generated valid CycloneDX SBOM (2 component(s): $compNames, specVersion: $($syftJson.specVersion))" -ForegroundColor Green
+    $compNames = $compNamesList -join ', '
+    Write-Host "PASS: Syft generated valid CycloneDX SBOM ($($syftJson.components.Count) component(s): $compNames, specVersion: $($syftJson.specVersion))" -ForegroundColor Green
 
     # -------------------------------------------------------------
     # 4. Grype Vulnerability Detection & Policy Rejection Canary
