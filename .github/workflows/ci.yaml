@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@0a44ba7841725637a54e280ec667c276c6cb814d # v4.4.1
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
 
@@ -29,7 +29,7 @@ jobs:
           npm install -g @fission-ai/openspec@1.8.0
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@3951f0dda7a4f37618c59e7e6027a4d538686e09 # v4.3.0
+        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
         with:
           dotnet-version: '10.0.302'
 
