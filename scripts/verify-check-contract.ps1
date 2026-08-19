@@ -111,7 +111,7 @@ try {
     }
 
     # 2. Corrupt one report (introduce stale report finding / modification)
-    [IO.File]::WriteAllText((Join-Path $testDir2 "gitleaks-report.json"), '[{"RuleID":"github-pat","Secret":"ghp_stale123"}]', [System.Text.UTF8Encoding]::new($false))
+    [IO.File]::WriteAllText((Join-Path $testDir2 "gitleaks-report.json"), '[{"RuleID":"github-pat","Secret":"ghp_stale123"}]', [System.Text.UTF8Encoding]::new($false)) # gitleaks:allow
     
     $procStale = Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "`"$secSummaryScript`"", "-EvidenceDir", "`"$testDir2`"" -WindowStyle Hidden -PassThru -Wait
     if ($procStale.ExitCode -eq 0) {

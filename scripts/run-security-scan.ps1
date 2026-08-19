@@ -134,8 +134,14 @@ foreach ($s in $scannersToRun) {
             $reportPath = Join-Path $evidenceFullDir "gitleaks-report.json"
             Write-Host "Running Gitleaks $($t.Version) repository & commit scan..." -ForegroundColor Cyan
 
-            $proc = Start-Process -FilePath $t.Path -ArgumentList "detect", "--source", "`"$repoRoot`"", "--report-format", "json", "--report-path", "`"$reportPath`"", "--exit-code", "1" -NoNewWindow -PassThru
-            [void]($proc | Wait-Process -Timeout 60 -ErrorAction Stop)
+            # Prefer git subcommand (full history scan); fall back to detect --source for non-git environments.
+            $gitleaksConfig = Join-Path $repoRoot ".gitleaks.toml"
+            $glArgs = @("git", "--no-banner", "--report-format", "json", "--report-path", "`"$reportPath`"", "--exit-code", "1")
+            if (Test-Path $gitleaksConfig) {
+                $glArgs += @("--config", "`"$gitleaksConfig`"")
+            }
+            $proc = Start-Process -FilePath $t.Path -ArgumentList $glArgs -NoNewWindow -PassThru
+            [void]($proc | Wait-Process -Timeout 120 -ErrorAction Stop)
             $exitCode = $proc.ExitCode
 
             if ($exitCode -ne 0) {
