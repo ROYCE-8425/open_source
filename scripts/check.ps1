@@ -1,6 +1,6 @@
 param(
     [string]$Profile = "Full",
-    [string]$ContractPath = "scripts\check-contract.json",
+    [string]$ContractPath = "scripts/check-contract.json",
     [string]$EvidencePath = ""
 )
 
@@ -61,7 +61,8 @@ function Get-SafeChildPath {
     if ([System.IO.Path]::IsPathRooted($RelativePath)) { throw "$Name path '$RelativePath' must not be rooted." }
     if ($RelativePath -match '\.\.') { throw "$Name path '$RelativePath' must not contain '..'." }
 
-    $fullPath = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($Root, $RelativePath))
+    $normRel = $RelativePath.Replace('\', [System.IO.Path]::DirectorySeparatorChar).Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+    $fullPath = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($Root, $normRel))
     [void](Assert-SafePathChain $fullPath $Root)
     return $fullPath
 }
@@ -79,21 +80,21 @@ if (-not (Get-Command "openspec" -ErrorAction SilentlyContinue) -and -not (Get-C
 }
 
 $expectedLocks = @(
-    "src\DXOS.Api\packages.lock.json",
-    "src\DXOS.AppHost\packages.lock.json",
-    "src\DXOS.Application\packages.lock.json",
-    "src\DXOS.Domain\packages.lock.json",
-    "src\DXOS.Infrastructure\packages.lock.json",
-    "src\DXOS.Workflows\packages.lock.json",
-    "tests\DXOS.Architecture.Tests\packages.lock.json",
-    "tests\DXOS.Integration.Tests\packages.lock.json",
-    "tests\DXOS.Unit.Tests\packages.lock.json"
+    "src/DXOS.Api/packages.lock.json",
+    "src/DXOS.AppHost/packages.lock.json",
+    "src/DXOS.Application/packages.lock.json",
+    "src/DXOS.Domain/packages.lock.json",
+    "src/DXOS.Infrastructure/packages.lock.json",
+    "src/DXOS.Workflows/packages.lock.json",
+    "tests/DXOS.Architecture.Tests/packages.lock.json",
+    "tests/DXOS.Integration.Tests/packages.lock.json",
+    "tests/DXOS.Unit.Tests/packages.lock.json"
 )
 
 function Get-LockSnapshot {
     $snapshot = @{}
     foreach ($lock in $expectedLocks) {
-        $fullPath = Join-Path $expectedRoot $lock
+        $fullPath = Get-SafeChildPath $expectedRoot $lock "Lock"
         if (-not (Test-Path $fullPath)) {
             throw "Missing required lock file: $lock"
         }
@@ -132,7 +133,7 @@ if ($validProfiles -notcontains $Profile) {
 $runId = [guid]::NewGuid().ToString()
 
 if ([string]::IsNullOrWhiteSpace($EvidencePath)) {
-    $outDir = Get-SafeChildPath $expectedRoot "artifacts\quality-gate" "Quality Gate Dir"
+    $outDir = Get-SafeChildPath $expectedRoot "artifacts/quality-gate" "Quality Gate Dir"
     if (-not (Test-Path $outDir)) {
         New-Item -ItemType Directory -Path $outDir -Force | Out-Null
     }
