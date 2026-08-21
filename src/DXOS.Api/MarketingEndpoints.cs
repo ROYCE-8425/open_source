@@ -43,6 +43,20 @@ internal static class MarketingEndpoints
             }
         });
 
+        app.MapGet("/campaigns", async (CampaignService campaigns, HttpContext http, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                ReadActor(http);
+                var items = await campaigns.ListAsync(cancellationToken);
+                return Results.Ok(items.Select(ToCampaignResponse).ToList());
+            }
+            catch (DomainRuleException ex)
+            {
+                return MapDomainException(ex);
+            }
+        });
+
         app.MapPost("/leads/webhook", async (FormLeadRequest request, LeadService leads, HttpContext http, CancellationToken cancellationToken) =>
         {
             try

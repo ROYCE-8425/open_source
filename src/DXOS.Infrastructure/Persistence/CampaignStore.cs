@@ -26,6 +26,15 @@ public sealed class CampaignStore : ICampaignStore
         return record is null ? null : ToDomain(record);
     }
 
+    public async Task<IReadOnlyList<Campaign>> ListAsync(CancellationToken cancellationToken)
+    {
+        var records = await _db.Campaigns
+            .AsNoTracking()
+            .OrderByDescending(c => c.CreatedAtUtc)
+            .ToListAsync(cancellationToken);
+        return records.Select(ToDomain).ToList();
+    }
+
     public async Task UpdateAsync(Campaign campaign, CancellationToken cancellationToken)
     {
         var record = await _db.Campaigns.FirstOrDefaultAsync(c => c.Id == campaign.Id, cancellationToken)

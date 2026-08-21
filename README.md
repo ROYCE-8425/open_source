@@ -113,7 +113,9 @@ docker compose up -d
 curl -f http://localhost:5000/health
 ```
 
-The DX-OS API will be available at `http://localhost:5000` and PostgreSQL at `localhost:5432`.
+The DX-OS API is at `http://localhost:8080`. PostgreSQL is at `localhost:5432` (or `POSTGRES_PORT`).
+
+Open the operator board (Vietnamese, VND): [http://localhost:8080/](http://localhost:8080/). Visual rules: [docs/design.md](docs/design.md). Product board: [docs/PRODUCT_BOARD.md](docs/PRODUCT_BOARD.md).
 
 Lead-to-CPL slice (`NOT_READY`, no live ads): send `X-DXOS-Role` and `X-DXOS-Actor`. Endpoints: `POST /campaigns`, `POST /campaigns/{id}/submit-review`, `POST /campaigns/{id}/approve`, `POST /campaigns/{id}/reject`, `GET /campaigns/{id}`, `POST /leads/webhook`, `GET /leads`, `POST /leads/{id}/claim`, `GET /dashboard/cpl`. DX-OS stops at Lead/CPL and does not close orders.
 

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DX-OS — Bảng điều hành Lead đến CPL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #646f79;
+            --on-primary: #ffffff;
+            --background: #ffffff;
+            --surface: #f3f3f3;
+            --border: #e8e8e8;
+            --text: #0d0d0d;
+            --text-muted: #5c6370;
+            --accent: #0d0e10;
+            --danger: #b42318;
+            --warning: #b54708;
+            --ok: #027a48;
+            --radius-sm: 4px;
+            --radius: 8px;
+            --radius-lg: 16px;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --motion: 200ms ease-in-out;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: "Be Vietnam Pro", "Segoe UI", "Noto Sans", sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        .wrap { max-width: 1120px; margin: 0 auto; padding: 32px 24px 64px; }
+        .banner {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 12px 16px; margin-bottom: 24px;
+        }
+        .chip {
+            display: inline-block; padding: 4px 10px; border-radius: var(--radius-sm);
+            background: var(--accent); color: #fff; font-size: 12px; font-weight: 600;
+        }
+        .health { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--text-muted); }
+        .ok { color: var(--ok); } .bad { color: var(--danger); }
+        h1 { font-size: 30px; font-weight: 500; line-height: 1.2; margin-bottom: 8px; }
+        .lede { color: var(--text-muted); margin-bottom: 24px; }
+        .role-bar {
+            display: flex; flex-wrap: wrap; gap: 12px; align-items: end;
+            padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 24px;
+        }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+        input, select, button {
+            font-family: inherit; font-size: 16px; min-height: 44px; padding: 8px 12px;
+            border-radius: var(--radius-sm); border: 1px solid var(--border); background: #fff; color: var(--text);
+        }
+        input:focus, select:focus { outline: 2px solid var(--primary); border-color: var(--primary); }
+        button { cursor: pointer; background: var(--surface); transition: background var(--motion); }
+        button:hover { background: #ececec; }
+        .btn-main { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+        .btn-main:hover { background: #545e68; }
+        .btn-ok { color: var(--ok); }
+        .btn-warn { color: var(--warning); }
+        .btn-danger { color: var(--danger); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+        .card {
+            background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+            box-shadow: var(--shadow); padding: 20px; display: flex; flex-direction: column; gap: 16px;
+        }
+        .card h2 { font-size: 20px; font-weight: 600; }
+        .pipe { font-size: 13px; color: var(--text-muted); }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; font-size: 12px; color: var(--text-muted); padding: 8px; border-bottom: 1px solid var(--border); }
+        td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        .st { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: var(--surface); }
+        .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+        .metric { background: var(--surface); border-radius: var(--radius); padding: 16px; }
+        .metric span { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+        .metric strong { font-size: 22px; font-weight: 600; }
+        .notice { display: none; padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; border: 1px solid var(--border); }
+        .notice.err { display: block; color: var(--danger); border-color: #f0c0bc; background: #fff5f4; }
+        .notice.ok { display: block; color: var(--ok); border-color: #b7e4c7; background: #f3faf6; }
+        .log { font-size: 13px; color: var(--text-muted); max-height: 160px; overflow: auto; }
+        .log div { padding: 4px 0; border-bottom: 1px solid var(--border); }
+        .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="banner">
+            <div>
+                <span class="chip">CHƯA SẴN SÀNG PHÁT HÀNH</span>
+                <span style="margin-left:8px;color:var(--text-muted);font-size:14px;">Bảng điều hành quy trình marketing — không phát quảng cáo thật</span>
+            </div>
+            <div class="health">
+                <span id="pillLive">API…</span>
+                <span id="pillReady">CSDL…</span>
+                <button type="button" onclick="runSmoke()">Kiểm tra quy trình kỹ thuật</button>
+            </div>
+        </div>
+
+        <h1>DX-OS</h1>
+        <p class="lede">Luồng số: soạn chiến dịch → chuyên viên chuyển duyệt → chủ doanh nghiệp phát hành nội bộ → tiếp nhận lead → chi phí trên mỗi lead (đồng Việt Nam).</p>
+
+        <div class="role-bar">
+            <div class="field">
+                <label for="selectRole">Vai trò vận hành</label>
+                <select id="selectRole" onchange="updateActor()">
+                    <option value="Marketer" selected>Chuyên viên</option>
+                    <option value="Owner">Chủ doanh nghiệp</option>
+                    <option value="Sales">Kinh doanh</option>
+                    <option value="Content">Nội dung</option>
+                    <option value="System">Hệ thống</option>
+                </select>
+            </div>
+            <div class="field" style="flex:1;min-width:200px;">
+                <label for="inputActor">Người thao tác</label>
+                <input id="inputActor" value="chuyen-vien-mai" oninput="updateActor()">
+            </div>
+            <button type="button" onclick="setPreset('Marketer','chuyen-vien-mai')">Chuyên viên</button>
+            <button type="button" onclick="setPreset('Owner','chu-doanh-nghiep')">Chủ DN</button>
+            <button type="button" onclick="setPreset('Sales','kinh-doanh-an')">Kinh doanh</button>
+        </div>
+
+        <div id="alertBox" class="notice"></div>
+
+        <div class="grid">
+            <section class="card">
+                <h2>Quy trình chiến dịch</h2>
+                <p class="pipe">Nháp → chờ chuyên viên → chờ chủ doanh nghiệp → đã phát hành (nội bộ). Không bỏ bước.</p>
+                <div class="row">
+                    <input id="campaignTopic" placeholder="Chủ đề chiến dịch" style="flex:1;">
+                    <button class="btn-main" type="button" onclick="createCampaign()">Tạo nháp</button>
+                    <button type="button" onclick="loadCampaigns()">Tải lại</button>
+                </div>
+                <table>
+                    <thead><tr><th>Chiến dịch</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                    <tbody id="campaignsTableBody"><tr><td colspan="3">Đang tải…</td></tr></tbody>
+                </table>
+            </section>
+
+            <section class="card">
+                <h2>Tiếp nhận lead</h2>
+                <p class="pipe">Điểm: đủ SĐT và email = 80 · một trong hai = 50 · còn lại = 20. Nhận lead trong 15 phút.</p>
+                <div class="row">
+                    <input id="leadName" placeholder="Họ tên *">
+                    <input id="leadPhone" placeholder="Số điện thoại">
+                </div>
+                <div class="row">
+                    <input id="leadEmail" placeholder="Email">
+                    <select id="leadCampaignSelect"><option value="">Chiến dịch (không bắt buộc)</option></select>
+                </div>
+                <button class="btn-main" type="button" onclick="submitLead()">Ghi nhận lead</button>
+                <button type="button" onclick="loadLeads()">Tải lại</button>
+                <table>
+                    <thead><tr><th>Lead</th><th>Điểm</th><th>Nhận</th></tr></thead>
+                    <tbody id="leadsTableBody"><tr><td colspan="3">Đang tải…</td></tr></tbody>
+                </table>
+            </section>
+        </div>
+
+        <section class="card" style="margin-top:24px;">
+            <h2>Chi phí trên mỗi lead</h2>
+            <div class="row" style="align-items:end;">
+                <div class="field">
+                    <label for="spendInput">Chi phí quảng cáo (₫)</label>
+                    <input type="number" id="spendInput" value="2000000" min="0" step="1000">
+                </div>
+                <button class="btn-main" type="button" onclick="loadCpl()">Tính CPL</button>
+            </div>
+            <div class="metrics">
+                <div class="metric"><span>Chi phí đã nhập</span><strong id="metricSpend">—</strong></div>
+                <div class="metric"><span>Số lead</span><strong id="metricLeads">0</strong></div>
+                <div class="metric"><span>Chi phí / lead</span><strong id="metricCpl">—</strong></div>
+                <div class="metric"><span>Sàn quảng cáo</span><strong id="metricAdsLive">Chưa kết nối</strong></div>
+            </div>
+        </section>
+
+        <section class="card" style="margin-top:24px;">
+            <h2>Nhật ký thao tác</h2>
+            <div class="log" id="logConsole"></div>
+        </section>
+    </div>
+    <script>
+        const vnd = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
+        const statusVi = {
+            Draft: 'Nháp',
+            PendingReview: 'Chờ chuyên viên',
+            PendingApproval: 'Chờ chủ doanh nghiệp',
+            Published: 'Đã phát hành (nội bộ)',
+            Rejected: 'Từ chối'
+        };
+        let currentRole = 'Marketer';
+        let currentActor = 'chuyen-vien-mai';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateActor();
+            checkHealth();
+            loadCampaigns();
+            loadLeads();
+            loadCpl();
+            setInterval(checkHealth, 15000);
+        });
+
+        function setPreset(role, actor) {
+            document.getElementById('selectRole').value = role;
+            document.getElementById('inputActor').value = actor;
+            updateActor();
+        }
+        function updateActor() {
+            currentRole = document.getElementById('selectRole').value;
+            currentActor = document.getElementById('inputActor').value.trim() || 'anon';
+        }
+        function headers(json) {
+            const h = { 'X-DXOS-Role': currentRole, 'X-DXOS-Actor': currentActor };
+            if (json) h['Content-Type'] = 'application/json';
+            return h;
+        }
+        function log(msg) {
+            const el = document.getElementById('logConsole');
+            const row = document.createElement('div');
+            row.textContent = new Date().toLocaleTimeString('vi-VN') + ' — ' + msg;
+            el.prepend(row);
+        }
+        function showAlert(msg, ok) {
+            const box = document.getElementById('alertBox');
+            box.className = ok ? 'notice ok' : 'notice err';
+            box.textContent = msg;
+        }
+        function escapeHtml(t) {
+            return String(t || '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
+        }
+
+        async function checkHealth() {
+            try {
+                const live = await fetch('/health/live');
+                document.getElementById('pillLive').textContent = live.ok ? 'API: hoạt động' : 'API: lỗi';
+                document.getElementById('pillLive').className = live.ok ? 'ok' : 'bad';
+            } catch { document.getElementById('pillLive').textContent = 'API: mất kết nối'; }
+            try {
+                const ready = await fetch('/health/ready');
+                const data = await ready.json();
+                const ok = ready.ok && data.status === 'Healthy';
+                document.getElementById('pillReady').textContent = ok ? 'CSDL: đã kết nối' : 'CSDL: chưa sẵn sàng';
+                document.getElementById('pillReady').className = ok ? 'ok' : 'bad';
+            } catch { document.getElementById('pillReady').textContent = 'CSDL: lỗi'; }
+        }
+
+        async function runSmoke() {
+            const res = await fetch('/smoke/workflow', { method: 'POST' });
+            const data = await res.json();
+            const ok = res.ok && data.output === 'DXOS_SMOKE_OK';
+            log(ok ? 'Quy trình kỹ thuật hoàn tất' : 'Quy trình kỹ thuật thất bại');
+            showAlert(ok ? 'Quy trình kỹ thuật hoàn tất.' : (data.error || 'Thất bại'), ok);
+        }
+
+        async function loadCampaigns() {
+            const res = await fetch('/campaigns', { headers: headers(false) });
+            if (!res.ok) { showAlert((await res.json()).error || 'Không tải được chiến dịch'); return; }
+            const items = await res.json();
+            const body = document.getElementById('campaignsTableBody');
+            if (!items.length) {
+                body.innerHTML = '<tr><td colspan="3">Chưa có chiến dịch.</td></tr>';
+            } else {
+                body.innerHTML = items.map(c => {
+                    let actions = '';
+                    if (c.status === 'Draft' || c.status === 'PendingReview') {
+                        actions += `<button class="btn-warn" onclick="submitReview('${c.id}')">Chuyển duyệt</button> `;
+                    }
+                    if (c.status !== 'Published' && c.status !== 'Rejected') {
+                        actions += `<button class="btn-ok" onclick="approve('${c.id}')">Phát hành</button> `;
+                        actions += `<button class="btn-danger" onclick="reject('${c.id}')">Từ chối</button>`;
+                    }
+                    return `<tr><td><strong>${escapeHtml(c.topic)}</strong><div style="color:var(--text-muted);font-size:13px;">${escapeHtml(c.copy)}</div></td><td><span class="st">${statusVi[c.status] || c.status}</span></td><td>${actions}</td></tr>`;
+                }).join('');
+            }
+            const sel = document.getElementById('leadCampaignSelect');
+            const cur = sel.value;
+            sel.innerHTML = '<option value="">Chiến dịch (không bắt buộc)</option>' + items.map(c => `<option value="${c.id}">${escapeHtml(c.topic)}</option>`).join('');
+            if (cur) sel.value = cur;
+        }
+
+        async function createCampaign() {
+            const topic = document.getElementById('campaignTopic').value.trim();
+            if (!topic) { showAlert('Nhập chủ đề chiến dịch.'); return; }
+            const res = await fetch('/campaigns', { method: 'POST', headers: headers(true), body: JSON.stringify({ topic }) });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('campaignTopic').value = '';
+                showAlert('Đã tạo nháp.', true);
+                log('Tạo nháp: ' + data.topic);
+                await loadCampaigns();
+            } else {
+                showAlert((data.error || 'Không tạo được') + (data.code ? ' (' + data.code + ')' : ''));
+                log('Lỗi tạo: ' + data.error);
+            }
+        }
+
+        async function submitReview(id) {
+            const res = await fetch('/campaigns/' + id + '/submit-review', { method: 'POST', headers: headers(true) });
+            const data = await res.json();
+            if (res.ok) { showAlert('Đã chuyển: ' + (statusVi[data.status] || data.status), true); await loadCampaigns(); }
+            else { showAlert(data.error || 'Không chuyển duyệt được'); log(data.error); }
+        }
+        async function approve(id) {
+            const res = await fetch('/campaigns/' + id + '/approve', { method: 'POST', headers: headers(true) });
+            const data = await res.json();
+            if (res.ok) { showAlert('Đã phát hành nội bộ. Không đẩy quảng cáo.', true); await loadCampaigns(); }
+            else { showAlert(data.error || 'Không phát hành được'); log(data.error); }
+        }
+        async function reject(id) {
+            const res = await fetch('/campaigns/' + id + '/reject', { method: 'POST', headers: headers(true) });
+            const data = await res.json();
+            if (res.ok) { showAlert('Đã từ chối.', true); await loadCampaigns(); }
+            else { showAlert(data.error || 'Không từ chối được'); }
+        }
+
+        async function loadLeads() {
+            const res = await fetch('/leads', { headers: headers(false) });
+            if (!res.ok) return;
+            const items = await res.json();
+            const body = document.getElementById('leadsTableBody');
+            if (!items.length) { body.innerHTML = '<tr><td colspan="3">Chưa có lead.</td></tr>'; return; }
+            body.innerHTML = items.map(l => {
+                const contact = [l.phone, l.email].filter(Boolean).join(' · ');
+                const claim = l.claimedByActor
+                    ? ('Đã nhận: ' + escapeHtml(l.claimedByActor))
+                    : `<button class="btn-main" onclick="claimLead('${l.id}')">Nhận lead</button>`;
+                return `<tr><td><strong>${escapeHtml(l.name)}</strong><div style="color:var(--text-muted);font-size:13px;">${escapeHtml(contact)}</div></td><td>${l.score}</td><td>${claim}</td></tr>`;
+            }).join('');
+        }
+
+        async function submitLead() {
+            const name = document.getElementById('leadName').value.trim();
+            if (!name) { showAlert('Cần họ tên.'); return; }
+            const payload = {
+                name,
+                phone: document.getElementById('leadPhone').value.trim() || null,
+                email: document.getElementById('leadEmail').value.trim() || null,
+                campaignId: document.getElementById('leadCampaignSelect').value || null
+            };
+            const res = await fetch('/leads/webhook', { method: 'POST', headers: headers(true), body: JSON.stringify(payload) });
+            const data = await res.json();
+            if (res.ok) {
+                showAlert('Đã ghi lead, điểm ' + data.score + '.', true);
+                document.getElementById('leadName').value = '';
+                document.getElementById('leadPhone').value = '';
+                document.getElementById('leadEmail').value = '';
+                await loadLeads();
+                await loadCpl();
+            } else { showAlert(data.error || 'Không ghi lead được'); }
+        }
+
+        async function claimLead(id) {
+            const res = await fetch('/leads/' + id + '/claim', { method: 'POST', headers: headers(true) });
+            const data = await res.json();
+            if (res.ok) { showAlert('Đã nhận lead.', true); await loadLeads(); }
+            else { showAlert(data.error || 'Không nhận được'); }
+        }
+
+        async function loadCpl() {
+            const spend = Number(document.getElementById('spendInput').value) || 0;
+            const res = await fetch('/dashboard/cpl?spend=' + encodeURIComponent(spend), { headers: headers(false) });
+            const data = await res.json();
+            if (!res.ok) { showAlert(data.error || 'Không tính CPL được'); return; }
+            document.getElementById('metricSpend').textContent = vnd.format(data.spend);
+            document.getElementById('metricLeads').textContent = data.leadCount;
+            document.getElementById('metricCpl').textContent = vnd.format(data.cpl);
+            document.getElementById('metricAdsLive').textContent = data.adsLive ? 'Đã kết nối' : 'Chưa kết nối';
+        }
+    </script>
+</body>
+</html>

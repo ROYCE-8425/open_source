@@ -42,6 +42,9 @@ builder.Services.AddElsa(elsa =>
 
 var app = builder.Build();
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 // Liveness endpoint (Does NOT depend on PostgreSQL)
 app.MapGet("/health/live", () => Results.Ok(new
 {

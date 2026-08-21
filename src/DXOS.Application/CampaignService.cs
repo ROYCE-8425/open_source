@@ -61,6 +61,11 @@ public sealed class CampaignService
         return _store.GetAsync(campaignId, cancellationToken);
     }
 
+    public Task<IReadOnlyList<Campaign>> ListAsync(CancellationToken cancellationToken)
+    {
+        return _store.ListAsync(cancellationToken);
+    }
+
     private async Task<Campaign> GetRequiredAsync(Guid campaignId, CancellationToken cancellationToken)
     {
         var campaign = await _store.GetAsync(campaignId, cancellationToken);
