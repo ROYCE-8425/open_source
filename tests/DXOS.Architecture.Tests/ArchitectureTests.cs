@@ -11,8 +11,8 @@ namespace DXOS.Architecture.Tests;
 
 public sealed class ArchitectureTests
 {
-    private static readonly System.Reflection.Assembly DomainAssembly = typeof(DXOS.Domain.Class1).Assembly;
-    private static readonly System.Reflection.Assembly ApplicationAssembly = typeof(DXOS.Application.Class1).Assembly;
+    private static readonly System.Reflection.Assembly DomainAssembly = typeof(DXOS.Domain.Campaign).Assembly;
+    private static readonly System.Reflection.Assembly ApplicationAssembly = typeof(DXOS.Application.CampaignService).Assembly;
     private static readonly System.Reflection.Assembly InfrastructureAssembly = typeof(DXOS.Infrastructure.Persistence.BootstrapDbContext).Assembly;
     private static readonly System.Reflection.Assembly WorkflowsAssembly = typeof(DXOS.Workflows.Smoke.EngineeringSmokeWorkflow).Assembly;
     private static readonly System.Reflection.Assembly ApiAssembly = System.Reflection.Assembly.Load("DXOS.Api");

@@ -115,6 +115,8 @@ curl -f http://localhost:5000/health
 
 The DX-OS API will be available at `http://localhost:5000` and PostgreSQL at `localhost:5432`.
 
+Lead-to-CPL slice (`NOT_READY`, no live ads): send `X-DXOS-Role` and `X-DXOS-Actor`. Endpoints: `POST /campaigns`, `POST /campaigns/{id}/submit-review`, `POST /campaigns/{id}/approve`, `POST /campaigns/{id}/reject`, `GET /campaigns/{id}`, `POST /leads/webhook`, `GET /leads`, `POST /leads/{id}/claim`, `GET /dashboard/cpl`. DX-OS stops at Lead/CPL and does not close orders.
+
 ---
 
 ## 7. Building from Source

@@ -1,3 +1,5 @@
+using DXOS.Api;
+using DXOS.Application;
 using DXOS.Infrastructure.Persistence;
 using DXOS.Workflows.Smoke;
 using Elsa.Extensions;
@@ -21,6 +23,12 @@ if (string.IsNullOrWhiteSpace(connectionString))
 
 builder.Services.AddDbContext<BootstrapDbContext>(options =>
     options.UseNpgsql(connectionString));
+builder.Services.AddSingleton<IClock, SystemClock>();
+builder.Services.AddSingleton<CampaignCopyStub>();
+builder.Services.AddScoped<ICampaignStore, CampaignStore>();
+builder.Services.AddScoped<ILeadStore, LeadStore>();
+builder.Services.AddScoped<CampaignService>();
+builder.Services.AddScoped<LeadService>();
 
 // Health Checks
 builder.Services.AddHealthChecks()
@@ -170,6 +178,8 @@ app.MapPost("/smoke/workflow", async (
         output = actualOutput
     });
 });
+
+app.MapMarketingSlice();
 
 // Startup database migration if explicitly requested
 if (app.Configuration.GetValue<bool>("Database:AutoMigrate", false))

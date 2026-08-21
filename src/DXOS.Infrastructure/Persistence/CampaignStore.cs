@@ -1,0 +1,67 @@
+using DXOS.Application;
+using DXOS.Domain;
+using DXOS.Infrastructure.Persistence.Entities;
+using Microsoft.EntityFrameworkCore;
+
+namespace DXOS.Infrastructure.Persistence;
+
+public sealed class CampaignStore : ICampaignStore
+{
+    private readonly BootstrapDbContext _db;
+
+    public CampaignStore(BootstrapDbContext db)
+    {
+        _db = db;
+    }
+
+    public async Task AddAsync(Campaign campaign, CancellationToken cancellationToken)
+    {
+        _db.Campaigns.Add(ToRecord(campaign));
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<Campaign?> GetAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var record = await _db.Campaigns.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        return record is null ? null : ToDomain(record);
+    }
+
+    public async Task UpdateAsync(Campaign campaign, CancellationToken cancellationToken)
+    {
+        var record = await _db.Campaigns.FirstOrDefaultAsync(c => c.Id == campaign.Id, cancellationToken)
+            ?? throw new InvalidOperationException($"Campaign '{campaign.Id}' was not found.");
+        record.Topic = campaign.Topic;
+        record.Copy = campaign.Copy;
+        record.Status = campaign.Status.ToString();
+        record.CreatedByActor = campaign.CreatedByActor;
+        record.CreatedAtUtc = campaign.CreatedAtUtc;
+        record.UpdatedAtUtc = campaign.UpdatedAtUtc;
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static CampaignRecord ToRecord(Campaign campaign)
+    {
+        return new CampaignRecord
+        {
+            Id = campaign.Id,
+            Topic = campaign.Topic,
+            Copy = campaign.Copy,
+            Status = campaign.Status.ToString(),
+            CreatedByActor = campaign.CreatedByActor,
+            CreatedAtUtc = campaign.CreatedAtUtc,
+            UpdatedAtUtc = campaign.UpdatedAtUtc
+        };
+    }
+
+    private static Campaign ToDomain(CampaignRecord record)
+    {
+        return Campaign.Restore(
+            record.Id,
+            record.Topic,
+            record.Copy,
+            Enum.Parse<CampaignStatus>(record.Status),
+            record.CreatedByActor,
+            record.CreatedAtUtc,
+            record.UpdatedAtUtc);
+    }
+}

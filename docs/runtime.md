@@ -42,6 +42,22 @@ DX-OS uses two independent runtime paths for developer workflows and containeriz
 | `/health/ready` | `GET` | Readiness Probe | Performs a real database connectivity check on PostgreSQL. Returns `200 OK` when ready, or `503 Service Unavailable` if unreachable. |
 | `/smoke/workflow` | `POST` | Elsa Smoke Workflow | Executes the deterministic `EngineeringSmokeWorkflow` via Elsa 3 `IWorkflowRunner`. Returns `200 OK` with workflow instance ID, status `Completed`, and deterministic output `DXOS_SMOKE_OK`. Fails fast (`503/500`) if dependencies are unavailable. |
 
+## 3.1 Lead-to-CPL slice (NOT_READY)
+
+Temporary headers: `X-DXOS-Role` (`Owner` / `Marketer` / `Content` / `Sales` / `System`) and `X-DXOS-Actor`. No Identity/SSO. Campaign copy is a local stub from topic — no LLM and no API key. DX-OS stops at Lead/CPL; it does not close orders or push ads.
+
+- `POST /campaigns` — create `Draft` (AI stub copy)
+- `POST /campaigns/{id}/submit-review` — Marketer: `Draft` → `PendingReview` → `PendingApproval`
+- `POST /campaigns/{id}/approve` — Owner only, `PendingApproval` → `Published` (does **not** push ads)
+- `POST /campaigns/{id}/reject` — Owner or Marketer
+- `GET /campaigns/{id}`
+- `POST /leads/webhook` — Form lead `{ name, phone, email, campaignId? }`
+- `GET /leads` — list; unclaims Sales after 15-minute SLA
+- `POST /leads/{id}/claim` — Sales
+- `GET /dashboard/cpl?spend=` — manual spend (default 0) + lead count + CPL
+
+`NOT_READY`: no Facebook/TikTok/Google Ads live, no Zalo OA inbox, no A/B CTR, no revenue/accounting UI.
+
 ---
 
 ## 4. Runtime Smoke Automation
