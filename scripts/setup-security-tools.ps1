@@ -4,7 +4,9 @@ param(
     [string]$ManifestPath = "",
     [string]$ToolsDir = "",
     [switch]$Force,
-    [switch]$VerifyOnly
+    [switch]$VerifyOnly,
+    [string]$ValidateTarArchive = "",
+    [string]$ValidateTarExtractTarget = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -226,6 +228,21 @@ function Validate-TarArchiveSafely {
             throw "Tar link escape violation (symlinks and hardlinks forbidden): '$line'"
         }
     }
+}
+
+if (-not [string]::IsNullOrWhiteSpace($ValidateTarArchive)) {
+    if ([string]::IsNullOrWhiteSpace($ValidateTarExtractTarget)) {
+        throw "ValidateTarExtractTarget is required when ValidateTarArchive is set."
+    }
+    if (-not (Test-Path $ValidateTarArchive)) {
+        throw "TAR archive not found: $ValidateTarArchive"
+    }
+    if (-not (Test-Path $ValidateTarExtractTarget)) {
+        [void](New-Item -ItemType Directory -Path $ValidateTarExtractTarget -Force)
+    }
+    Validate-TarArchiveSafely -ArchiveFile $ValidateTarArchive -ExtractTarget $ValidateTarExtractTarget
+    Write-Host "PASS: TAR archive entries validated before extraction."
+    return
 }
 
 $stagingBase = Join-Path $ToolsDir ".staging"

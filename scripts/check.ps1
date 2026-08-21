@@ -68,11 +68,12 @@ function Get-SafeChildPath {
 }
 
 $sdkVersion = (dotnet --version).Trim()
-if ($sdkVersion -ne "10.0.302" -and $sdkVersion -ne "10.0.100") {
-    # Accept standard .NET 10 preview SDK versions
-    if (-not ($sdkVersion -match "^10\.0\.")) {
-        throw "Expected .NET 10 SDK, but found $sdkVersion"
-    }
+if ($sdkVersion -notmatch '^10\.0\.(3[0-9]{2})$') {
+    throw "Expected .NET SDK 10.0.3xx (pinned 10.0.302, rollForward latestPatch), found $sdkVersion"
+}
+$sdkFeaturePatch = [int]$Matches[1]
+if ($sdkFeaturePatch -lt 302) {
+    throw "Expected .NET SDK >= 10.0.302, found $sdkVersion"
 }
 
 if (-not (Get-Command "openspec" -ErrorAction SilentlyContinue) -and -not (Get-Command "openspec.cmd" -ErrorAction SilentlyContinue)) {
@@ -133,7 +134,7 @@ if ($validProfiles -notcontains $Profile) {
 $runId = [guid]::NewGuid().ToString()
 
 if ([string]::IsNullOrWhiteSpace($EvidencePath)) {
-    $outDir = Get-SafeChildPath $expectedRoot "artifacts/quality-gate" "Quality Gate Dir"
+    $outDir = Get-SafeChildPath $expectedRoot "artifacts/quality-gate/run-$runId" "Quality Gate Dir"
     if (-not (Test-Path $outDir)) {
         New-Item -ItemType Directory -Path $outDir -Force | Out-Null
     }

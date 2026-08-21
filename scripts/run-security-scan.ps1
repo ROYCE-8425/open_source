@@ -18,8 +18,12 @@ if (-not $ToolsDir) {
 }
 $ToolsDir = [System.IO.Path]::GetFullPath($ToolsDir)
 
+if ([string]::IsNullOrWhiteSpace($RunId)) {
+    $RunId = [guid]::NewGuid().ToString()
+}
+
 if (-not $EvidenceDir) {
-    $evidenceFullDir = Join-Path $repoRoot "artifacts\quality-gate"
+    $evidenceFullDir = Join-Path $repoRoot "artifacts\quality-gate\run-$RunId"
 } elseif ([System.IO.Path]::IsPathRooted($EvidenceDir)) {
     $evidenceFullDir = [System.IO.Path]::GetFullPath($EvidenceDir)
 } else {
@@ -125,6 +129,29 @@ function Find-StrictTool([string]$Name) {
     }
 }
 
+function Write-RunSidecar {
+    param(
+        [string]$ArtifactPath,
+        [string]$ScannerName
+    )
+    if ([string]::IsNullOrWhiteSpace($RunId)) {
+        throw "RunId is required to bind scanner output '$ArtifactPath'."
+    }
+    if (-not (Test-Path $ArtifactPath)) {
+        throw "Cannot write sidecar; artifact missing: $ArtifactPath"
+    }
+    $hash = (Get-FileHash -Path $ArtifactPath -Algorithm SHA256).Hash.ToUpperInvariant()
+    $meta = @{
+        runId = $RunId
+        scanner = $ScannerName
+        artifact = [System.IO.Path]::GetFileName($ArtifactPath)
+        sha256 = $hash
+        generatedAt = (Get-Date).ToString("o")
+    }
+    $metaPath = "$ArtifactPath.meta.json"
+    [System.IO.File]::WriteAllText($metaPath, ($meta | ConvertTo-Json -Compress), [System.Text.UTF8Encoding]::new($false))
+}
+
 $scannersToRun = if ($Scanner -eq "All") { @("Gitleaks", "Trivy", "Syft", "Grype", "Summary") } else { @($Scanner) }
 
 foreach ($s in $scannersToRun) {
@@ -155,6 +182,7 @@ foreach ($s in $scannersToRun) {
             if ($leakCount -ne 0) {
                 throw "Gitleaks report contains $leakCount leak findings."
             }
+            Write-RunSidecar -ArtifactPath $reportPath -ScannerName "gitleaks"
             Write-Host "PASS: Gitleaks scan clean (0 leaks)." -ForegroundColor Green
         }
 
@@ -213,6 +241,8 @@ foreach ($s in $scannersToRun) {
             if ($imgVulnCount -ne 0) {
                 throw "Trivy image report contains $imgVulnCount HIGH/CRITICAL vulnerabilities."
             }
+            Write-RunSidecar -ArtifactPath $configReport -ScannerName "trivy-config"
+            Write-RunSidecar -ArtifactPath $imageReport -ScannerName "trivy-image"
             Write-Host "PASS: Trivy config and image scans clean (0 misconfigs, 0 vulnerabilities)." -ForegroundColor Green
         }
 
@@ -266,8 +296,8 @@ foreach ($s in $scannersToRun) {
                 [System.IO.File]::WriteAllText($committedSbom, $finalSbomJson, [System.Text.UTF8Encoding]::new($false))
                 [System.IO.File]::WriteAllText($evidenceSbom, $finalSbomJson, [System.Text.UTF8Encoding]::new($false))
             } finally {
-                if (Test-Path $stagingDir) { Remove-Item $stagingDir -Recurse -Force -ErrorAction SilentlyContinue }
-                if (Test-Path $rawTempSbom) { Remove-Item $rawTempSbom -Force -ErrorAction SilentlyContinue }
+                if (Test-Path $stagingDir) { Remove-Item $stagingDir -Recurse -Force }
+                if (Test-Path $rawTempSbom) { Remove-Item $rawTempSbom -Force }
             }
 
             # Strict SBOM validation
@@ -287,6 +317,7 @@ foreach ($s in $scannersToRun) {
                 throw "SBOM contains private machine path leak!"
             }
 
+            Write-RunSidecar -ArtifactPath $evidenceSbom -ScannerName "syft"
             Write-Host "PASS: Syft generated canonical deduplicated CycloneDX SBOM ($($sbomJson.components.Count) components)." -ForegroundColor Green
         }
 
@@ -317,12 +348,14 @@ foreach ($s in $scannersToRun) {
             if ($matchCount -ne 0) {
                 throw "Grype report contains $matchCount HIGH/CRITICAL vulnerability matches."
             }
+            Write-RunSidecar -ArtifactPath $reportPath -ScannerName "grype"
             Write-Host "PASS: Grype scan clean (0 vulnerabilities at/above threshold)." -ForegroundColor Green
         }
 
         "Summary" {
             Write-Host "Running atomic security summary generation..." -ForegroundColor Cyan
-            & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "generate-security-summary.ps1") -EvidenceDir $evidenceFullDir -ToolsDir $ToolsDir -RunId $RunId
+            $pwshExe = (Get-Process -Id $PID).Path
+            & $pwshExe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "generate-security-summary.ps1") -EvidenceDir $evidenceFullDir -ToolsDir $ToolsDir -RunId $RunId
             if ($LASTEXITCODE -ne 0) {
                 throw "generate-security-summary.ps1 failed with exit code $LASTEXITCODE"
             }

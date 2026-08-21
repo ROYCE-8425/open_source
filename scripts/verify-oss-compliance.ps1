@@ -144,33 +144,42 @@ function Verify-OssInventory {
         throw "OSS Inventory contains $($extraInInv.Count) extraneous package(s) not in lockfiles: $($extraInInv -join ', ')"
     }
 
+    function Get-ExactSetDelta([System.Collections.Generic.HashSet[string]]$Expected, [System.Collections.Generic.HashSet[string]]$Actual, [string]$Label) {
+        $missing = @()
+        foreach ($k in $Expected) {
+            if (-not $Actual.Contains($k)) { $missing += $k }
+        }
+        $extra = @()
+        foreach ($k in $Actual) {
+            if (-not $Expected.Contains($k)) { $extra += $k }
+        }
+        if ($missing.Count -gt 0 -or $extra.Count -gt 0) {
+            throw "$Label exact-set mismatch. Missing ($($missing.Count)): $($missing -join ', '); Extra ($($extra.Count)): $($extra -join ', ')"
+        }
+    }
+
     # 2. Container Images Exact Bi-Directional Reconciliation
     $expectedImages = @(
         @{ name = "mcr.microsoft.com/dotnet/aspnet"; version = "10.0"; digest = "sha256:207cc51496778557731c81ff670333d8ade4a4fec22768fd1be8e78474a84ecf"; license = "MIT" },
         @{ name = "mcr.microsoft.com/dotnet/sdk"; version = "10.0"; digest = "sha256:e1fc6e423f543119c406d24e2e687d67c569f18f04a37a8b0005d80ad0dcee80"; license = "MIT" },
         @{ name = "postgres"; version = "18.4-alpine"; digest = "sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15"; license = "PostgreSQL License" }
     )
-
-    $invImages = if ($inv.containerImages) { @($inv.containerImages) } else { @() }
-    if ($invImages.Count -ne $expectedImages.Count) {
-        throw "Container image count mismatch: inventory has $($invImages.Count), expected $($expectedImages.Count)"
-    }
-
+    $expectedImageSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
     foreach ($exp in $expectedImages) {
-        $matched = $invImages | Where-Object { $_.name -eq $exp.name }
-        if (-not $matched) {
-            throw "OSS inventory missing expected container image: $($exp.name)"
+        [void]$expectedImageSet.Add("$($exp.name)|$($exp.version)|$($exp.digest)|$($exp.license)")
+    }
+    $invImages = if ($inv.containerImages) { @($inv.containerImages) } else { @() }
+    $actualImageSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($img in $invImages) {
+        if ([string]::IsNullOrWhiteSpace($img.name) -or [string]::IsNullOrWhiteSpace($img.version) -or [string]::IsNullOrWhiteSpace($img.digest) -or [string]::IsNullOrWhiteSpace($img.license)) {
+            throw "Container image record missing name/version/digest/license: $($img | ConvertTo-Json -Compress)"
         }
-        if ($matched.version -ne $exp.version) {
-            throw "Image '$($exp.name)' version mismatch: expected '$($exp.version)', found '$($matched.version)'"
-        }
-        if ($matched.digest -ne $exp.digest) {
-            throw "Image '$($exp.name)' digest mismatch: expected '$($exp.digest)', found '$($matched.digest)'"
-        }
-        if ($matched.license -ne $exp.license) {
-            throw "Image '$($exp.name)' license mismatch: expected '$($exp.license)', found '$($matched.license)'"
+        $key = "$($img.name)|$($img.version)|$($img.digest)|$($img.license)"
+        if (-not $actualImageSet.Add($key)) {
+            throw "Duplicate container image identity in inventory: $key"
         }
     }
+    Get-ExactSetDelta $expectedImageSet $actualImageSet "Container images"
 
     # 3. Security Tools Exact Bi-Directional Reconciliation against scripts/security-tools.json
     $toolsJsonPath = Join-Path $repoRoot "scripts\security-tools.json"
@@ -178,48 +187,56 @@ function Verify-OssInventory {
         throw "Missing scripts/security-tools.json"
     }
     $toolsJson = Get-Content $toolsJsonPath -Raw | ConvertFrom-Json
-    $expectedToolNames = @("gitleaks", "trivy", "syft", "grype")
-    
+    $expectedToolSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($manifestTool in $toolsJson.tools) {
+        $win = $manifestTool.artifacts.'windows-x64'
+        $linux = $manifestTool.artifacts.'linux-x64'
+        if (-not $win -or -not $linux) {
+            throw "Manifest tool '$($manifestTool.name)' missing windows-x64 or linux-x64 artifact identity."
+        }
+        [void]$expectedToolSet.Add("$($manifestTool.name)|$($manifestTool.version)|$($manifestTool.license)|$($win.sha256)|$($win.executableSha256)|$($linux.sha256)|$($linux.executableSha256)")
+    }
     $invTools = if ($inv.securityTools) { @($inv.securityTools) } else { @() }
-    if ($invTools.Count -ne $expectedToolNames.Count) {
-        throw "Security tool count mismatch: inventory has $($invTools.Count), expected $($expectedToolNames.Count)"
-    }
-
-    foreach ($toolName in $expectedToolNames) {
-        $manifestTool = $toolsJson.tools | Where-Object { $_.name -eq $toolName } | Select-Object -First 1
-        if (-not $manifestTool) {
-            throw "Manifest missing definition for tool: $toolName"
+    $actualToolSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($tool in $invTools) {
+        if ([string]::IsNullOrWhiteSpace($tool.name) -or [string]::IsNullOrWhiteSpace($tool.version) -or [string]::IsNullOrWhiteSpace($tool.license)) {
+            throw "Security tool record missing name/version/license: $($tool | ConvertTo-Json -Compress)"
         }
-        $matched = $invTools | Where-Object { $_.name -eq $toolName }
-        if (-not $matched) {
-            throw "OSS inventory missing expected security tool: $toolName"
+        $winArchive = $tool.windowsArchiveSha256
+        $winExe = $tool.windowsExecutableSha256
+        $linuxArchive = $tool.linuxArchiveSha256
+        $linuxExe = $tool.linuxExecutableSha256
+        if ([string]::IsNullOrWhiteSpace($winArchive) -or [string]::IsNullOrWhiteSpace($winExe) -or [string]::IsNullOrWhiteSpace($linuxArchive) -or [string]::IsNullOrWhiteSpace($linuxExe)) {
+            throw "Security tool '$($tool.name)' missing acquisition/executable SHA-256 identity."
         }
-        if ($matched.version -ne $manifestTool.version) {
-            throw "Security tool '$toolName' version mismatch: expected '$($manifestTool.version)', found '$($matched.version)'"
-        }
-        if ($matched.license -ne $manifestTool.license) {
-            throw "Security tool '$toolName' license mismatch: expected '$($manifestTool.license)', found '$($matched.license)'"
+        $key = "$($tool.name)|$($tool.version)|$($tool.license)|$winArchive|$winExe|$linuxArchive|$linuxExe"
+        if (-not $actualToolSet.Add($key)) {
+            throw "Duplicate security tool identity in inventory: $key"
         }
     }
+    Get-ExactSetDelta $expectedToolSet $actualToolSet "Security tools"
 
     # 4. Third-Party Services Exact Bi-Directional Reconciliation
     $expectedServices = @(
-        @{ name = "Google Gemini"; license = "Commercial / Proprietary" },
-        @{ name = "OpenAI / Codex"; license = "Commercial / Proprietary" }
+        @{ name = "Google Gemini"; version = "API/CLI"; license = "Commercial / Proprietary"; officialSource = "https://ai.google.dev" },
+        @{ name = "OpenAI / Codex"; version = "API/CLI"; license = "Commercial / Proprietary"; officialSource = "https://openai.com" }
     )
-    $invServices = if ($inv.thirdPartyServices) { @($inv.thirdPartyServices) } else { @() }
-    if ($invServices.Count -ne $expectedServices.Count) {
-        throw "Third-party services count mismatch: inventory has $($invServices.Count), expected $($expectedServices.Count)"
-    }
+    $expectedServiceSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
     foreach ($exp in $expectedServices) {
-        $matched = $invServices | Where-Object { $_.name -eq $exp.name }
-        if (-not $matched) {
-            throw "OSS inventory missing expected third-party service: $($exp.name)"
+        [void]$expectedServiceSet.Add("$($exp.name)|$($exp.version)|$($exp.license)|$($exp.officialSource)")
+    }
+    $invServices = if ($inv.thirdPartyServices) { @($inv.thirdPartyServices) } else { @() }
+    $actualServiceSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($svc in $invServices) {
+        if ([string]::IsNullOrWhiteSpace($svc.name) -or [string]::IsNullOrWhiteSpace($svc.version) -or [string]::IsNullOrWhiteSpace($svc.license) -or [string]::IsNullOrWhiteSpace($svc.officialSource)) {
+            throw "Third-party service record missing name/version/license/officialSource: $($svc | ConvertTo-Json -Compress)"
         }
-        if ($matched.license -ne $exp.license) {
-            throw "Service '$($exp.name)' license mismatch: expected '$($exp.license)', found '$($matched.license)'"
+        $key = "$($svc.name)|$($svc.version)|$($svc.license)|$($svc.officialSource)"
+        if (-not $actualServiceSet.Add($key)) {
+            throw "Duplicate third-party service identity in inventory: $key"
         }
     }
+    Get-ExactSetDelta $expectedServiceSet $actualServiceSet "Third-party services"
 
     # 5. Reused Source Check
     $reusedSource = if ($inv.reusedSource) { @($inv.reusedSource) } else { @() }
