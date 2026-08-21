@@ -49,6 +49,94 @@ function Get-ObjectProperty {
     return $null
 }
 
+$script:IsWindowsOs = ($env:OS -eq 'Windows_NT')
+
+function Get-ChildProcessIds {
+    param([int]$ParentId)
+
+    $ids = New-Object System.Collections.Generic.List[int]
+    if ($script:IsWindowsOs) {
+        try {
+            $children = Get-CimInstance Win32_Process -Filter "ParentProcessId = $ParentId" -ErrorAction SilentlyContinue
+            if ($children) {
+                foreach ($c in $children) {
+                    $ids.Add([int]$c.ProcessId)
+                }
+            }
+        } catch { }
+        return $ids
+    }
+
+    try {
+        $procDirs = Get-ChildItem -Path '/proc' -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '^[0-9]+$' }
+        foreach ($dir in $procDirs) {
+            $statusPath = Join-Path $dir.FullName 'status'
+            if (-not (Test-Path -LiteralPath $statusPath)) { continue }
+            $parentPid = $null
+            foreach ($line in [System.IO.File]::ReadLines($statusPath)) {
+                if ($line.StartsWith('PPid:')) {
+                    $parentPid = [int]($line.Substring(5).Trim())
+                    break
+                }
+            }
+            if ($parentPid -eq $ParentId) {
+                $ids.Add([int]$dir.Name)
+            }
+        }
+    } catch { }
+
+    return $ids
+}
+
+function Stop-ProcessTreeById {
+    param([int]$ProcessId)
+
+    if ($ProcessId -le 0) { return }
+    if ($script:IsWindowsOs) {
+        try {
+            & taskkill /PID $ProcessId /T /F 2>&1 | Out-Null
+        } catch { }
+        return
+    }
+
+    try { & kill -TERM $ProcessId 2>&1 | Out-Null } catch { }
+    Start-Sleep -Milliseconds 200
+    try { & kill -KILL $ProcessId 2>&1 | Out-Null } catch { }
+}
+
+function Write-AspireProcessLogs {
+    param([string]$Reason)
+
+    Write-Host "==> AppHost logs ($Reason)"
+    try {
+        if ($null -ne $aspireStdoutTask -and $aspireStdoutTask.Wait(4000)) {
+            $stdoutText = $aspireStdoutTask.Result
+            if (-not [string]::IsNullOrWhiteSpace($stdoutText)) {
+                Write-Host "----- AppHost stdout -----"
+                Write-Host $stdoutText
+            } else {
+                Write-Host "AppHost stdout was empty."
+            }
+        } else {
+            Write-Host "AppHost stdout was still streaming (process may still be running)."
+        }
+    } catch {
+        Write-Host "Failed to read AppHost stdout: $_"
+    }
+
+    try {
+        if ($null -ne $aspireStderrTask -and $aspireStderrTask.Wait(4000)) {
+            $stderrText = $aspireStderrTask.Result
+            if (-not [string]::IsNullOrWhiteSpace($stderrText)) {
+                Write-Host "----- AppHost stderr -----"
+                Write-Host $stderrText
+            }
+        }
+    } catch {
+        Write-Host "Failed to read AppHost stderr: $_"
+    }
+}
+
 function Invoke-BoundedNativeCommand {
     param(
         [string]$Command,
@@ -87,9 +175,9 @@ function Invoke-BoundedNativeCommand {
 
     if (-not $proc.WaitForExit($TimeoutMs)) {
         try {
-            & taskkill /PID $proc.Id /T /F 2>&1 | Out-Null
+            Stop-ProcessTreeById -ProcessId $proc.Id
         } catch {
-            $proc.Kill()
+            try { $proc.Kill() } catch { }
         }
         throw "Command '$Command $($psi.Arguments)' timed out after $($TimeoutMs / 1000)s"
     }
@@ -126,13 +214,9 @@ function Refresh-OwnedProcessTree {
     while ($queue.Count -gt 0) {
         $curr = $queue.Dequeue()
         try {
-            $children = Get-CimInstance Win32_Process -Filter "ParentProcessId = $curr" -ErrorAction SilentlyContinue
-            if ($children) {
-                foreach ($c in $children) {
-                    $childPid = [int]$c.ProcessId
-                    if ($allOwnedPids.Add($childPid)) {
-                        $queue.Enqueue($childPid)
-                    }
+            foreach ($childPid in (Get-ChildProcessIds -ParentId $curr)) {
+                if ($allOwnedPids.Add($childPid)) {
+                    $queue.Enqueue($childPid)
                 }
             }
         } catch { }
@@ -151,6 +235,20 @@ function Invoke-HttpRequestWithRetry {
 
     for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
         Refresh-OwnedProcessTree
+        if ($null -ne $aspireProc) {
+            $hostExited = $false
+            $hostExitCode = $null
+            try {
+                if ($aspireProc.HasExited) {
+                    $hostExited = $true
+                    $hostExitCode = $aspireProc.ExitCode
+                }
+            } catch { }
+            if ($hostExited) {
+                try { Write-AspireProcessLogs -Reason "AppHost exited during wait for $Url" } catch { }
+                throw "AppHost exited with code $hostExitCode while waiting for $Url"
+            }
+        }
         try {
             $params = @{
                 Uri = $Url
@@ -211,6 +309,9 @@ $cleanupErrors = [System.Collections.Generic.List[string]]::new()
 $overallSuccess = $false
 $smokeFailure = $null
 $aspireStartTime = [DateTimeOffset]::UtcNow
+$aspireProc = $null
+$aspireStdoutTask = $null
+$aspireStderrTask = $null
 
 # Exact pre-run snapshots via bounded native calls
 $preContainersRaw = (Invoke-BoundedNativeCommand -Command "docker" -Arguments @("ps", "-a", "--no-trunc", "-q") -TimeoutMs 30000).Stdout
@@ -263,9 +364,18 @@ try {
     elseif ($Mode -eq 'Aspire') {
         Write-Host "==> Starting Aspire AppHost ($projectName)..."
 
+        $dashboardPort = 19000 + (Get-Random -Minimum 10 -Maximum 900)
+        $otlpPort = 19100 + (Get-Random -Minimum 10 -Maximum 900)
+        $resourcePort = 19200 + (Get-Random -Minimum 10 -Maximum 900)
+        if ($dashboardPort -eq $apiPort) { $dashboardPort++ }
+        if ($otlpPort -eq $apiPort -or $otlpPort -eq $dashboardPort) { $otlpPort++ }
+        if ($resourcePort -eq $apiPort -or $resourcePort -eq $dashboardPort -or $resourcePort -eq $otlpPort) { $resourcePort++ }
+
+        Write-Host "Aspire bind: API=127.0.0.1:$apiPort dashboard=127.0.0.1:$dashboardPort otlp=127.0.0.1:$otlpPort resource=127.0.0.1:$resourcePort"
+
         $psi = New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName = "dotnet"
-        $psi.Arguments = "run --project src/DXOS.AppHost/DXOS.AppHost.csproj --no-build -c Release --launch-profile http"
+        $psi.Arguments = "run --project src/DXOS.AppHost/DXOS.AppHost.csproj --no-build -c Release --no-launch-profile"
         $psi.WorkingDirectory = $gitRoot
         $psi.UseShellExecute = $false
         $psi.RedirectStandardOutput = $true
@@ -274,33 +384,39 @@ try {
         $psi.StandardErrorEncoding = [System.Text.UTF8Encoding]::new($false)
         $psi.CreateNoWindow = $true
 
-        $psi.EnvironmentVariables["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "http://localhost:0"
-        $psi.EnvironmentVariables["ASPNETCORE_URLS"] = "http://localhost:$apiPort"
+        $psi.EnvironmentVariables["ASPNETCORE_URLS"] = "http://127.0.0.1:$dashboardPort"
+        $psi.EnvironmentVariables["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "http://127.0.0.1:$otlpPort"
+        $psi.EnvironmentVariables["DOTNET_RESOURCE_SERVICE_ENDPOINT_URL"] = "http://127.0.0.1:$resourcePort"
         $psi.EnvironmentVariables["API_PORT"] = "$apiPort"
         $psi.EnvironmentVariables["POSTGRES_PORT"] = "$postgresPort"
         $psi.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = "Development"
+        $psi.EnvironmentVariables["DOTNET_ENVIRONMENT"] = "Development"
         $psi.EnvironmentVariables["ASPIRE_ALLOW_UNSECURED_TRANSPORT"] = "true"
+        $psi.EnvironmentVariables["DOTNET_ASPIRE_CONTAINER_RUNTIME"] = "docker"
         $psi.EnvironmentVariables["EngineeringSmoke__Enabled"] = "true"
         $psi.EnvironmentVariables["DXOS_RUN_ID"] = $runId
 
         $aspireProc = [System.Diagnostics.Process]::Start($psi)
         $ownedProcesses.Add($aspireProc)
         $allOwnedPids.Add($aspireProc.Id) | Out-Null
+        $aspireStdoutTask = $aspireProc.StandardOutput.ReadToEndAsync()
+        $aspireStderrTask = $aspireProc.StandardError.ReadToEndAsync()
+        Write-Host "AppHost PID=$($aspireProc.Id) wait URL=http://127.0.0.1:$apiPort/health/live"
     }
 
-    $baseUrl = "http://localhost:$apiPort"
+    $baseUrl = "http://127.0.0.1:$apiPort"
 
     Write-Host "==> Probing API Liveness: $baseUrl/health/live..."
     $liveRes = Invoke-HttpRequestWithRetry -Url "$baseUrl/health/live" -MaxAttempts 30 -DelaySeconds 2
     if (-not $liveRes.Success) {
-        throw "API failed liveness check after timeout."
+        throw "API failed liveness check after timeout ($baseUrl/health/live)."
     }
     Write-Host "[OK] Liveness OK: $($liveRes.Content)"
 
     Write-Host "==> Probing API Readiness: $baseUrl/health/ready..."
     $readyRes = Invoke-HttpRequestWithRetry -Url "$baseUrl/health/ready" -MaxAttempts 30 -DelaySeconds 2
     if (-not $readyRes.Success) {
-        throw "API failed readiness check after timeout."
+        throw "API failed readiness check after timeout ($baseUrl/health/ready)."
     }
     Write-Host "[OK] Readiness OK: $($readyRes.Content)"
 
@@ -439,16 +555,25 @@ finally {
         }
     }
     elseif ($Mode -eq 'Aspire') {
-        # 1. Terminate AppHost process tree
+        # 1. Terminate AppHost process tree (Windows taskkill / Linux kill)
+        Refresh-OwnedProcessTree
+        foreach ($ownedPid in @($allOwnedPids)) {
+            try {
+                Stop-ProcessTreeById -ProcessId $ownedPid
+            } catch {
+                $cleanupErrors.Add("Failed to terminate owned process $ownedPid`: $_")
+            }
+        }
         foreach ($proc in $ownedProcesses) {
             try {
                 if (-not $proc.HasExited) {
-                    & taskkill /PID $proc.Id /T /F 2>&1 | Out-Null
+                    $proc.Kill()
                 }
-            }
-            catch {
-                $cleanupErrors.Add("Failed to terminate owned process $($proc.Id): $_")
-            }
+            } catch { }
+            try { [void]$proc.WaitForExit(5000) } catch { }
+        }
+        if (-not $overallSuccess) {
+            Write-AspireProcessLogs -Reason "cleanup after failure"
         }
 
         # 2. Identify and remove ONLY owned containers (satisfies BOTH: not in pre-existing snapshot AND has proven ownership via dxos.run.id or creatorProcessId in owned PIDs)

@@ -35,7 +35,11 @@ if (apiPort.HasValue)
 {
     var portStr = apiPort.Value.ToString();
     api.WithHttpEndpoint(port: apiPort.Value, targetPort: apiPort.Value, name: "http", isProxied: false);
-    api.WithEnvironment("ASPNETCORE_URLS", "http://localhost:" + portStr);
+    // Callback wins over DCP's localhost/::1 injection. Smoke probes 127.0.0.1 on Ubuntu Actions.
+    api.WithEnvironment(context =>
+    {
+        context.EnvironmentVariables["ASPNETCORE_URLS"] = "http://127.0.0.1:" + portStr;
+    });
 }
 
 builder.Build().Run();
