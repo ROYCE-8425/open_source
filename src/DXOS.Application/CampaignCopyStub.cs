@@ -5,6 +5,6 @@ public sealed class CampaignCopyStub
     public string DraftFromTopic(string topic)
     {
         var normalized = string.IsNullOrWhiteSpace(topic) ? "untitled" : topic.Trim();
-        return $"DX-OS draft copy for '{normalized}'. Form-lead CTA only. NOT_READY: no live ads, no LLM.";
+        return $"Bản nháp DX-OS cho «{normalized}». Chỉ kêu gọi điền form. Chưa phát hành quảng cáo, chưa gọi mô hình ngôn ngữ.";
     }
 }

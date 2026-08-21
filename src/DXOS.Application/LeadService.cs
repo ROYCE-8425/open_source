@@ -86,14 +86,34 @@ public sealed class LeadService
         return lead;
     }
 
-    public async Task<CplDashboard> GetCplAsync(decimal spend, CancellationToken cancellationToken)
+    public async Task<CplDashboard> GetCplAsync(
+        decimal? spendOverride,
+        decimal? dailySpend,
+        decimal? budget,
+        decimal storedSpend,
+        CancellationToken cancellationToken)
     {
         var leads = await ListAsync(cancellationToken);
         var leadCount = leads.Count;
-        var safeSpend = spend < 0 ? 0 : spend;
-        var cpl = leadCount == 0 ? 0 : decimal.Round(safeSpend / leadCount, 2, MidpointRounding.AwayFromZero);
-        return new CplDashboard(safeSpend, leadCount, cpl);
+        var effectiveSpend = spendOverride.HasValue
+            ? (spendOverride.Value < 0 ? 0 : spendOverride.Value)
+            : (storedSpend < 0 ? 0 : storedSpend);
+        var cpl = leadCount == 0 ? 0 : decimal.Round(effectiveSpend / leadCount, 0, MidpointRounding.AwayFromZero);
+        var safeDaily = dailySpend is null or < 0 ? 0 : dailySpend.Value;
+        var safeBudget = budget is null or < 0 ? 0 : budget.Value;
+        var remaining = safeBudget > 0 ? safeBudget - effectiveSpend : 0;
+        var days = SpendPacing.DaysUntilEmpty(safeBudget, effectiveSpend, safeDaily);
+        var projected = SpendPacing.ProjectedLeads(remaining, cpl);
+        return new CplDashboard(effectiveSpend, leadCount, cpl, "VND", safeDaily, safeBudget, days, projected);
     }
 }
 
-public sealed record CplDashboard(decimal Spend, int LeadCount, decimal Cpl);
+public sealed record CplDashboard(
+    decimal Spend,
+    int LeadCount,
+    decimal Cpl,
+    string Currency,
+    decimal DailySpend,
+    decimal Budget,
+    decimal DaysUntilEmpty,
+    int ProjectedLeads);

@@ -77,6 +77,20 @@ public sealed class Campaign
         TransitionTo(next, nowUtc);
     }
 
+    public void SendToOwner(ActorRole role, DateTimeOffset nowUtc)
+    {
+        if (Status == CampaignStatus.PendingApproval)
+        {
+            return;
+        }
+
+        SubmitReview(role, nowUtc);
+        if (Status == CampaignStatus.PendingReview)
+        {
+            SubmitReview(role, nowUtc);
+        }
+    }
+
     public void Approve(ActorRole role, DateTimeOffset nowUtc)
     {
         EnsureNotTerminal();

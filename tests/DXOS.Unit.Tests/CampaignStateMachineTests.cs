@@ -61,6 +61,18 @@ public sealed class CampaignStateMachineTests
     }
 
     [Fact]
+    public void SendToOwner_FromDraft_ReachesPendingApproval_WithoutSkippingOwnerGate()
+    {
+        var campaign = Campaign.CreateDraft("topic", "copy", "mai", Now);
+        campaign.SendToOwner(ActorRole.Marketer, Now);
+        Assert.Equal(CampaignStatus.PendingApproval, campaign.Status);
+        var skip = Assert.Throws<DomainRuleException>(() => campaign.Approve(ActorRole.Marketer, Now));
+        Assert.Equal("ForbiddenRole", skip.Code);
+        campaign.Approve(ActorRole.Owner, Now);
+        Assert.Equal(CampaignStatus.Published, campaign.Status);
+    }
+
+    [Fact]
     public void Owner_CannotSubmitReview()
     {
         var campaign = Campaign.CreateDraft("topic", "copy", "owner-1", Now);

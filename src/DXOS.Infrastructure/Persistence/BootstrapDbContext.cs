@@ -14,6 +14,7 @@ public sealed class BootstrapDbContext : DbContext
     public DbSet<CampaignRecord> Campaigns => Set<CampaignRecord>();
     public DbSet<LeadRecord> Leads => Set<LeadRecord>();
     public DbSet<SalesAssignmentState> SalesAssignment => Set<SalesAssignmentState>();
+    public DbSet<TrafficSnapshotRecord> TrafficSnapshots => Set<TrafficSnapshotRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -61,6 +62,21 @@ public sealed class BootstrapDbContext : DbContext
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.LastAssignedActor).IsRequired().HasMaxLength(128);
             entity.Property(e => e.SalesActors).IsRequired();
+        });
+
+        modelBuilder.Entity<TrafficSnapshotRecord>(entity =>
+        {
+            entity.ToTable("traffic_snapshots");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.CampaignId).IsRequired();
+            entity.Property(e => e.PeriodDate).IsRequired();
+            entity.Property(e => e.Impressions).IsRequired();
+            entity.Property(e => e.Clicks).IsRequired();
+            entity.Property(e => e.Visits).IsRequired();
+            entity.Property(e => e.SpendVnd).HasColumnType("numeric(18,0)").IsRequired();
+            entity.Property(e => e.Source).IsRequired().HasMaxLength(32);
+            entity.Property(e => e.RecordedByActor).IsRequired().HasMaxLength(128);
+            entity.Property(e => e.CreatedAtUtc).IsRequired();
         });
     }
 }

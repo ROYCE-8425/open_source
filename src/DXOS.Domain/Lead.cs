@@ -125,4 +125,20 @@ public sealed class Lead
         AssignedAtUtc = null;
         return true;
     }
+
+    public int? SlaRemainingSeconds(DateTimeOffset nowUtc)
+    {
+        if (!string.IsNullOrWhiteSpace(ClaimedByActor))
+        {
+            return null;
+        }
+
+        if (AssignedAtUtc is null)
+        {
+            return null;
+        }
+
+        var remaining = (int)Math.Ceiling((AssignedAtUtc.Value + LeadSla.Duration - nowUtc).TotalSeconds);
+        return remaining < 0 ? 0 : remaining;
+    }
 }

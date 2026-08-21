@@ -38,6 +38,15 @@ public sealed class CampaignService
         return campaign;
     }
 
+    public async Task<Campaign> SendToOwnerAsync(ActorContext actor, Guid campaignId, CancellationToken cancellationToken)
+    {
+        EnsureActor(actor);
+        var campaign = await GetRequiredAsync(campaignId, cancellationToken);
+        campaign.SendToOwner(actor.Role, _clock.UtcNow);
+        await _store.UpdateAsync(campaign, cancellationToken);
+        return campaign;
+    }
+
     public async Task<Campaign> ApproveAsync(ActorContext actor, Guid campaignId, CancellationToken cancellationToken)
     {
         EnsureActor(actor);
