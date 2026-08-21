@@ -2,10 +2,10 @@
     "$schema":  "http://cyclonedx.org/schema/bom-1.7.schema.json",
     "bomFormat":  "CycloneDX",
     "specVersion":  "1.7",
-    "serialNumber":  "urn:uuid:81a20a1d-0a41-4b7c-8fd4-9661d2048e0f",
+    "serialNumber":  "urn:uuid:42c072bb-42e7-4d7e-b798-34067ede0a6d",
     "version":  1,
     "metadata":  {
-                     "timestamp":  "2026-08-19T19:46:49+07:00",
+                     "timestamp":  "2026-08-21T11:16:16+07:00",
                      "tools":  {
                                    "components":  [
                                                       {
@@ -326,11 +326,11 @@
                                           ]
                        },
                        {
-                           "bom-ref":  "f883fc093c19386b",
+                           "bom-ref":  "4926eec9a75071f9",
                            "type":  "application",
                            "name":  "DX-OS",
-                           "version":  "1.0.0+72808fa31a303e6d8e25437a354dae7b624fceb2",
-                           "cpe":  "cpe:2.3:a:DX-OS:DX-OS:1.0.0\\+72808fa31a303e6d8e25437a354dae7b624fceb2:*:*:*:*:*:*:*",
+                           "version":  "1.0.0+c2b3390d18068c805a8ad31bf0173afc2ba63b5b",
+                           "cpe":  "cpe:2.3:a:DX-OS:DX-OS:1.0.0\\+c2b3390d18068c805a8ad31bf0173afc2ba63b5b:*:*:*:*:*:*:*",
                            "properties":  [
                                               {
                                                   "name":  "syft:package:foundBy",
@@ -346,23 +346,23 @@
                                               },
                                               {
                                                   "name":  "syft:cpe23",
-                                                  "value":  "cpe:2.3:a:DX-OS:DX_OS:1.0.0\\+72808fa31a303e6d8e25437a354dae7b624fceb2:*:*:*:*:*:*:*"
+                                                  "value":  "cpe:2.3:a:DX-OS:DX_OS:1.0.0\\+c2b3390d18068c805a8ad31bf0173afc2ba63b5b:*:*:*:*:*:*:*"
                                               },
                                               {
                                                   "name":  "syft:cpe23",
-                                                  "value":  "cpe:2.3:a:DX_OS:DX-OS:1.0.0\\+72808fa31a303e6d8e25437a354dae7b624fceb2:*:*:*:*:*:*:*"
+                                                  "value":  "cpe:2.3:a:DX_OS:DX-OS:1.0.0\\+c2b3390d18068c805a8ad31bf0173afc2ba63b5b:*:*:*:*:*:*:*"
                                               },
                                               {
                                                   "name":  "syft:cpe23",
-                                                  "value":  "cpe:2.3:a:DX_OS:DX_OS:1.0.0\\+72808fa31a303e6d8e25437a354dae7b624fceb2:*:*:*:*:*:*:*"
+                                                  "value":  "cpe:2.3:a:DX_OS:DX_OS:1.0.0\\+c2b3390d18068c805a8ad31bf0173afc2ba63b5b:*:*:*:*:*:*:*"
                                               },
                                               {
                                                   "name":  "syft:cpe23",
-                                                  "value":  "cpe:2.3:a:DX:DX-OS:1.0.0\\+72808fa31a303e6d8e25437a354dae7b624fceb2:*:*:*:*:*:*:*"
+                                                  "value":  "cpe:2.3:a:DX:DX-OS:1.0.0\\+c2b3390d18068c805a8ad31bf0173afc2ba63b5b:*:*:*:*:*:*:*"
                                               },
                                               {
                                                   "name":  "syft:cpe23",
-                                                  "value":  "cpe:2.3:a:DX:DX_OS:1.0.0\\+72808fa31a303e6d8e25437a354dae7b624fceb2:*:*:*:*:*:*:*"
+                                                  "value":  "cpe:2.3:a:DX:DX_OS:1.0.0\\+c2b3390d18068c805a8ad31bf0173afc2ba63b5b:*:*:*:*:*:*:*"
                                               },
                                               {
                                                   "name":  "syft:location:0:path",
@@ -371,7 +371,7 @@
                                           ]
                        },
                        {
-                           "bom-ref":  "pkg:nuget/DX-OS@1.0.0.0?package-id=236c413671766eee",
+                           "bom-ref":  "pkg:nuget/DX-OS@1.0.0.0?package-id=2053fa9acfbd4e0e",
                            "type":  "library",
                            "name":  "DX-OS",
                            "version":  "1.0.0.0",
