@@ -396,6 +396,23 @@ try {
         $psi.EnvironmentVariables["EngineeringSmoke__Enabled"] = "true"
         $psi.EnvironmentVariables["DXOS_RUN_ID"] = $runId
 
+        $dcpRid = if ($script:IsWindowsOs) { "win-x64" } else { "linux-x64" }
+        $dcpFile = if ($script:IsWindowsOs) { "dcp.exe" } else { "dcp" }
+        $packagesRoot = if ($env:NUGET_PACKAGES) {
+            $env:NUGET_PACKAGES
+        } elseif ($env:HOME) {
+            Join-Path $env:HOME ".nuget" "packages"
+        } else {
+            Join-Path $env:USERPROFILE ".nuget" "packages"
+        }
+        $dcpCandidate = Join-Path $packagesRoot "aspire.hosting.orchestration.$dcpRid" "13.4.6" "tools" $dcpFile
+        if (Test-Path -LiteralPath $dcpCandidate) {
+            $psi.EnvironmentVariables["DcpPublisher__CliPath"] = $dcpCandidate
+            Write-Host "DCP cli path: $dcpCandidate"
+        } else {
+            Write-Host "DCP cli path not found at $dcpCandidate (AppHost will resolve host RID)."
+        }
+
         $aspireProc = [System.Diagnostics.Process]::Start($psi)
         $ownedProcesses.Add($aspireProc)
         $allOwnedPids.Add($aspireProc.Id) | Out-Null

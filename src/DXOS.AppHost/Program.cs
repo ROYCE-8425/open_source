@@ -1,3 +1,7 @@
+// RuntimeIdentifiers lists both win-x64 and linux-x64 for the lock file. The AppHost SDK
+// then resolves DCP from the first RID (win-x64), which does not exist on Ubuntu Actions.
+UseHostRidAspireTools();
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var runId = Environment.GetEnvironmentVariable("DXOS_RUN_ID");
@@ -43,3 +47,50 @@ if (apiPort.HasValue)
 }
 
 builder.Build().Run();
+
+static void UseHostRidAspireTools()
+{
+    var rid = OperatingSystem.IsWindows()
+        ? "win-x64"
+        : "linux-x64";
+    var dcpFile = OperatingSystem.IsWindows() ? "dcp.exe" : "dcp";
+    var dashboardFile = OperatingSystem.IsWindows() ? "AspireDashboard.exe" : "AspireDashboard";
+
+    var dcpPath = FindAspireTool("aspire.hosting.orchestration." + rid, dcpFile);
+    if (!string.IsNullOrWhiteSpace(dcpPath) && string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DcpPublisher__CliPath")))
+    {
+        Environment.SetEnvironmentVariable("DcpPublisher__CliPath", dcpPath);
+    }
+
+    var dashboardPath = FindAspireTool("aspire.dashboard.sdk." + rid, dashboardFile);
+    if (!string.IsNullOrWhiteSpace(dashboardPath) && string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DcpPublisher__DashboardPath")))
+    {
+        Environment.SetEnvironmentVariable("DcpPublisher__DashboardPath", dashboardPath);
+    }
+}
+
+static string? FindAspireTool(string packageId, string fileName)
+{
+    var packagesRoot = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+    if (string.IsNullOrWhiteSpace(packagesRoot))
+    {
+        packagesRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages");
+    }
+
+    var packageRoot = Path.Combine(packagesRoot, packageId);
+    if (!Directory.Exists(packageRoot))
+    {
+        return null;
+    }
+
+    foreach (var versionDir in Directory.GetDirectories(packageRoot).OrderByDescending(static dir => dir, StringComparer.OrdinalIgnoreCase))
+    {
+        var candidate = Path.Combine(versionDir, "tools", fileName);
+        if (File.Exists(candidate))
+        {
+            return candidate;
+        }
+    }
+
+    return null;
+}
