@@ -27,8 +27,11 @@ builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.AddSingleton<CampaignCopyStub>();
 builder.Services.AddScoped<ICampaignStore, CampaignStore>();
 builder.Services.AddScoped<ILeadStore, LeadStore>();
+builder.Services.AddScoped<ITrafficStore, TrafficStore>();
 builder.Services.AddScoped<CampaignService>();
 builder.Services.AddScoped<LeadService>();
+builder.Services.AddScoped<DemoSeedService>();
+builder.Services.AddScoped<TrafficService>();
 
 // Health Checks
 builder.Services.AddHealthChecks()
@@ -38,6 +41,7 @@ builder.Services.AddHealthChecks()
 builder.Services.AddElsa(elsa =>
 {
     elsa.AddWorkflow<EngineeringSmokeWorkflow>();
+    elsa.AddWorkflow<DXOS.Workflows.Traffic.TrafficIngestWorkflow>();
 });
 
 var app = builder.Build();

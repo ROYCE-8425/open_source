@@ -1,5 +1,6 @@
 using DXOS.Application;
 using DXOS.Domain;
+using Elsa.Workflows;
 
 namespace DXOS.Api;
 
@@ -15,6 +16,11 @@ internal static class MarketingEndpoints
         app.MapPost("/campaigns/{id:guid}/submit-review", async (Guid id, CampaignService campaigns, HttpContext http, CancellationToken cancellationToken) =>
         {
             return await ExecuteAsync(http, actor => campaigns.SubmitReviewAsync(actor, id, cancellationToken));
+        });
+
+        app.MapPost("/campaigns/{id:guid}/send-to-owner", async (Guid id, CampaignService campaigns, HttpContext http, CancellationToken cancellationToken) =>
+        {
+            return await ExecuteAsync(http, actor => campaigns.SendToOwnerAsync(actor, id, cancellationToken));
         });
 
         app.MapPost("/campaigns/{id:guid}/approve", async (Guid id, CampaignService campaigns, HttpContext http, CancellationToken cancellationToken) =>
@@ -57,13 +63,161 @@ internal static class MarketingEndpoints
             }
         });
 
+        app.MapPost("/campaigns/{id:guid}/traffic", async (
+            Guid id,
+            RecordTrafficRequest request,
+            IWorkflowRunner workflowRunner,
+            HttpContext http,
+            ILoggerFactory loggerFactory,
+            CancellationToken cancellationToken) =>
+        {
+            ActorContext actor;
+            try
+            {
+                actor = ReadActor(http);
+            }
+            catch (DomainRuleException ex)
+            {
+                return MapDomainException(ex);
+            }
+
+            var correlationId = Guid.NewGuid().ToString("N");
+            var workflow = new DXOS.Workflows.Traffic.TrafficIngestWorkflow();
+            var runWorkflowOptions = new Elsa.Workflows.Options.RunWorkflowOptions
+            {
+                CorrelationId = correlationId,
+                Input = new Dictionary<string, object>
+                {
+                    ["CampaignId"] = id,
+                    ["PeriodDate"] = request.PeriodDate?.ToString("yyyy-MM-dd") ?? DateTimeOffset.UtcNow.ToString("yyyy-MM-dd"),
+                    ["Impressions"] = request.Impressions,
+                    ["Clicks"] = request.Clicks,
+                    ["Visits"] = request.Visits,
+                    ["SpendVnd"] = request.SpendVnd,
+                    ["ActorRole"] = actor.Role.ToString(),
+                    ["ActorId"] = actor.ActorId
+                }
+            };
+
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, http.RequestAborted, cancellationToken);
+
+            try
+            {
+                var result = await workflowRunner.RunAsync(workflow, runWorkflowOptions, linkedCts.Token);
+                var workflowState = result.WorkflowState;
+                if (workflowState.Status != Elsa.Workflows.WorkflowStatus.Finished || workflowState.SubStatus != Elsa.Workflows.WorkflowSubStatus.Finished)
+                {
+                    var logger = loggerFactory.CreateLogger("MarketingEndpoints");
+                    logger.LogError("Traffic ingest workflow did not finish cleanly: Status={Status}, SubStatus={SubStatus}", workflowState.Status, workflowState.SubStatus);
+                    return Results.Json(new
+                    {
+                        status = "Failed",
+                        error = "Traffic ingest workflow did not reach terminal Finished state."
+                    }, statusCode: StatusCodes.Status500InternalServerError);
+                }
+
+                if (workflowState.Output.TryGetValue("IngestResult", out var ingestObj) && ingestObj is TrafficIngestResult ingestResult)
+                {
+                    return Results.Ok(ToTrafficIngestResponse(ingestResult));
+                }
+
+                var hasSnap = workflowState.Output.TryGetValue("Snapshot", out var snapObj);
+                var hasTot = workflowState.Output.TryGetValue("Totals", out var totObj);
+                if (hasSnap && snapObj is TrafficSnapshot snapshot && hasTot && totObj is CampaignTrafficTotals totals)
+                {
+                    return Results.Ok(ToTrafficIngestResponse(new TrafficIngestResult(snapshot, totals)));
+                }
+
+                return Results.Json(new
+                {
+                    status = "Failed",
+                    error = "Workflow output missing IngestResult."
+                }, statusCode: StatusCodes.Status500InternalServerError);
+            }
+            catch (DomainRuleException ex)
+            {
+                return MapDomainException(ex);
+            }
+        });
+
+        app.MapGet("/campaigns/{id:guid}/traffic", async (
+            Guid id,
+            TrafficService trafficService,
+            HttpContext http,
+            CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                ReadActor(http);
+                var summary = await trafficService.GetCampaignTrafficAsync(id, cancellationToken);
+                return Results.Ok(new
+                {
+                    campaignId = summary.Campaign.Id,
+                    topic = summary.Campaign.Topic,
+                    snapshots = summary.Snapshots.Select(ToTrafficSnapshotResponse).ToList(),
+                    totals = ToCampaignTrafficTotalsResponse(summary.Totals)
+                });
+            }
+            catch (DomainRuleException ex)
+            {
+                return MapDomainException(ex);
+            }
+        });
+
         app.MapPost("/leads/webhook", async (FormLeadRequest request, LeadService leads, HttpContext http, CancellationToken cancellationToken) =>
         {
             try
             {
                 ReadActor(http);
                 var lead = await leads.IntakeFormAsync(request.Name ?? string.Empty, request.Phone, request.Email, request.CampaignId, cancellationToken);
-                return Results.Ok(ToLeadResponse(lead));
+                return Results.Ok(ToLeadResponse(lead, DateTimeOffset.UtcNow));
+            }
+            catch (DomainRuleException ex)
+            {
+                return MapDomainException(ex);
+            }
+        });
+
+        app.MapPost("/leads/message", async (FormLeadRequest request, LeadService leads, HttpContext http, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                ReadActor(http);
+                var lead = await leads.RecordMessageOrCallAsync(request.Name ?? string.Empty, request.Phone, request.Email, LeadSource.Message, request.CampaignId, cancellationToken);
+                return Results.Ok(ToLeadResponse(lead, DateTimeOffset.UtcNow));
+            }
+            catch (DomainRuleException ex)
+            {
+                return MapDomainException(ex);
+            }
+        });
+
+        app.MapPost("/leads/call", async (FormLeadRequest request, LeadService leads, HttpContext http, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                ReadActor(http);
+                var lead = await leads.RecordMessageOrCallAsync(request.Name ?? string.Empty, request.Phone, request.Email, LeadSource.Call, request.CampaignId, cancellationToken);
+                return Results.Ok(ToLeadResponse(lead, DateTimeOffset.UtcNow));
+            }
+            catch (DomainRuleException ex)
+            {
+                return MapDomainException(ex);
+            }
+        });
+
+        app.MapPost("/demo/seed", async (DemoSeedService seed, HttpContext http, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                ReadActor(http);
+                var result = await seed.SeedAsync(cancellationToken);
+                return Results.Ok(new
+                {
+                    campaign = ToCampaignResponse(result.Campaign),
+                    leads = result.Leads.Select(l => ToLeadResponse(l, DateTimeOffset.UtcNow)).ToList()
+                });
             }
             catch (DomainRuleException ex)
             {
@@ -77,7 +231,8 @@ internal static class MarketingEndpoints
             {
                 ReadActor(http);
                 var items = await leads.ListAsync(cancellationToken);
-                return Results.Ok(items.Select(ToLeadResponse).ToList());
+                var now = DateTimeOffset.UtcNow;
+                return Results.Ok(items.Select(l => ToLeadResponse(l, now)).ToList());
             }
             catch (DomainRuleException ex)
             {
@@ -87,21 +242,34 @@ internal static class MarketingEndpoints
 
         app.MapPost("/leads/{id:guid}/claim", async (Guid id, LeadService leads, HttpContext http, CancellationToken cancellationToken) =>
         {
-            return await ExecuteAsync(http, actor => leads.ClaimAsync(actor, id, cancellationToken), ToLeadResponse);
+            return await ExecuteAsync(http, actor => leads.ClaimAsync(actor, id, cancellationToken));
         });
 
-        app.MapGet("/dashboard/cpl", async (decimal? spend, LeadService leads, HttpContext http, CancellationToken cancellationToken) =>
+        app.MapGet("/dashboard/cpl", async (
+            decimal? spend,
+            decimal? dailySpend,
+            decimal? budget,
+            LeadService leads,
+            TrafficService traffic,
+            HttpContext http,
+            CancellationToken cancellationToken) =>
         {
             try
             {
                 ReadActor(http);
-                var dashboard = await leads.GetCplAsync(spend ?? 0, cancellationToken);
+                var storedSpend = await traffic.GetTotalStoredSpendVndAsync(cancellationToken);
+                var dashboard = await leads.GetCplAsync(spend, dailySpend, budget, storedSpend, cancellationToken);
                 return Results.Ok(new
                 {
                     spend = dashboard.Spend,
                     leadCount = dashboard.LeadCount,
                     cpl = dashboard.Cpl,
+                    currency = dashboard.Currency,
                     adsLive = false,
+                    dailySpend = dashboard.DailySpend,
+                    budget = dashboard.Budget,
+                    daysUntilEmpty = dashboard.DaysUntilEmpty,
+                    projectedLeads = dashboard.ProjectedLeads,
                     status = "NOT_READY"
                 });
             }
@@ -128,7 +296,7 @@ internal static class MarketingEndpoints
 
             if (result is Lead lead)
             {
-                return Results.Ok(ToLeadResponse(lead));
+                return Results.Ok(ToLeadResponse(lead, DateTimeOffset.UtcNow));
             }
 
             return Results.Ok(projector is null ? result : projector(result));
@@ -182,7 +350,7 @@ internal static class MarketingEndpoints
         };
     }
 
-    private static object ToLeadResponse(Lead lead)
+    private static object ToLeadResponse(Lead lead, DateTimeOffset nowUtc)
     {
         return new
         {
@@ -197,7 +365,48 @@ internal static class MarketingEndpoints
             assignedAtUtc = lead.AssignedAtUtc,
             claimedByActor = lead.ClaimedByActor,
             claimedAtUtc = lead.ClaimedAtUtc,
+            slaRemainingSeconds = lead.SlaRemainingSeconds(nowUtc),
+            welcomeQueued = true,
+            welcomeChannel = "hang-doi-noi-bo",
             createdAtUtc = lead.CreatedAtUtc
+        };
+    }
+
+    private static object ToTrafficSnapshotResponse(TrafficSnapshot snapshot)
+    {
+        return new
+        {
+            id = snapshot.Id,
+            campaignId = snapshot.CampaignId,
+            periodDate = snapshot.PeriodDate.ToString("yyyy-MM-dd"),
+            impressions = snapshot.Impressions,
+            clicks = snapshot.Clicks,
+            visits = snapshot.Visits,
+            spendVnd = snapshot.SpendVnd,
+            source = snapshot.Source.ToString(),
+            recordedByActor = snapshot.RecordedByActor,
+            createdAtUtc = snapshot.CreatedAtUtc
+        };
+    }
+
+    private static object ToCampaignTrafficTotalsResponse(CampaignTrafficTotals totals)
+    {
+        return new
+        {
+            impressions = totals.Impressions,
+            clicks = totals.Clicks,
+            visits = totals.Visits,
+            spendVnd = totals.SpendVnd,
+            ctr = totals.Ctr
+        };
+    }
+
+    private static object ToTrafficIngestResponse(TrafficIngestResult result)
+    {
+        return new
+        {
+            snapshot = ToTrafficSnapshotResponse(result.Snapshot),
+            totals = ToCampaignTrafficTotalsResponse(result.Totals)
         };
     }
 }
@@ -205,3 +414,10 @@ internal static class MarketingEndpoints
 internal sealed record CreateCampaignRequest(string? Topic);
 
 internal sealed record FormLeadRequest(string? Name, string? Phone, string? Email, Guid? CampaignId);
+
+internal sealed record RecordTrafficRequest(
+    DateOnly? PeriodDate,
+    long Impressions,
+    long Clicks,
+    long Visits,
+    decimal SpendVnd);
