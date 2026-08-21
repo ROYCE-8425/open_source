@@ -17,7 +17,9 @@ Ensure you have installed:
 
 Docker Compose provides the fastest, all-in-one setup including the DX-OS API and a configured PostgreSQL 18.4 database.
 
-### 1. Clone the Repository
+### 1. Clone the Official Repository
+
+This GitHub repository name is `open_source`; the project is DX-OS:
 
 ```bash
 git clone https://github.com/ROYCE-8425/open_source.git dx-os

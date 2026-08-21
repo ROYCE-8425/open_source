@@ -18,7 +18,7 @@ Before opening an issue, check our documentation:
 ## 2. Community Discussions
 
 For general questions, architecture discussions, ideas, and troubleshooting:
-- **GitHub Discussions**: [https://github.com/ROYCE-8425/open_source/discussions](https://github.com/ROYCE-8425/open_source/discussions)
+- **GitHub Discussions**: [https://github.com/ROYCE-8425/open_source/discussions](https://github.com/ROYCE-8425/open_source/discussions) (GitHub repository name is `open_source`; project is DX-OS)
   - **Q&A**: Ask technical questions about setup, configuration, or workflows.
   - **Ideas**: Suggest new features or architectural ideas.
   - **Show and Tell**: Share custom marketing workflows and extensions you've built.

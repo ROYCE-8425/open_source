@@ -2,7 +2,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![REUSE status](https://img.shields.io/badge/REUSE-compliant-green.svg)](https://reuse.software)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+[![Local Build](https://img.shields.io/badge/local_build-passing-brightgreen.svg)]()
 [![Security Scanning](https://img.shields.io/badge/security-gitleaks%20%7C%20trivy%20%7C%20grype-blue.svg)]()
 [![SBOM](https://img.shields.io/badge/SBOM-CycloneDX%201.7-blue.svg)](artifacts/sbom.cdx.json)
 [![Status](https://img.shields.io/badge/status-bootstrap_remediation-orange.svg)](docs/PROJECT_STATE.md)
@@ -48,8 +48,8 @@ DX-OS solves this by delivering a **unified, self-hosted modular monolith** with
 | **BR001-R4**: Runtime Startup & Smoke Orchestration | **ACCEPTED** | Docker Compose & .NET Aspire orchestration with PostgreSQL 18.4. |
 | **BR001-R5**: Testing Suite | **ACCEPTED** | Unit tests (xUnit.net v3), ArchUnitNET architecture tests, Testcontainers PostgreSQL integration tests. |
 | **BR001-R6**: Governance & Architectural Decision Records | **ACCEPTED** | 7 ADRs, OpenSpec governance, and machine-readable state tracking. |
-| **BR001-R7**: Security, Supply Chain & OSS Inventory | **ACCEPTED** | Gitleaks secret scanning, Trivy misconfig checks, Syft CycloneDX SBOM, Grype vulnerability scans. |
-| **BR001-R8**: Clean Clone & Public Audits | *IN PROGRESS* | Public repository transition, verification badges, and external audits. |
+| **BR001-R7**: Security, Supply Chain & OSS Inventory | **IMPLEMENTED_LOCALLY / AWAITING_INDEPENDENT_REVIEW** | Gitleaks secret scanning, Trivy misconfig checks, Syft CycloneDX SBOM, Grype vulnerability scans. |
+| **BR001-R8**: Clean Clone & Public Audits | *NOT STARTED* | Public repository transition, verification badges, and external audits. |
 
 ---
 
@@ -102,7 +102,7 @@ DX-OS is architected as a **Modular Monolith** adhering to Clean Architecture pr
 ### Launching with Docker Compose
 
 ```bash
-# 1. Clone the repository
+# 1. Clone the official repository (GitHub repository name is `open_source`; the project is DX-OS)
 git clone https://github.com/ROYCE-8425/open_source.git dx-os
 cd dx-os
 

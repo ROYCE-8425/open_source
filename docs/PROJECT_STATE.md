@@ -4,10 +4,11 @@ Authoritative, evidence-backed summary of DX-OS engineering and governance state
 
 ## 1. Current Milestone
 
-- **Active Milestone**: BR001-R6: Agent Governance and Project Memory (Finalized / Transitioning to BR001-R7)
+- **Active Milestone**: BR001-R7: Security, Supply Chain & OSS Compliance (Implemented Locally / Awaiting Independent Review)
 - **OpenSpec Change**: openspec/changes/bootstrap-remediation-001/
-- **Active Beads Issue**: open_source-cab.5 (Accepted / Closed)
-- **Status**: Milestone accepted via Codex R6 Re-review 2 PASS.
+- **Active Beads Issue**: open_source-cab.8 (in_progress)
+- **Official Public Remote**: `https://github.com/ROYCE-8425/open_source` (repository name is `open_source`; project is DX-OS)
+- **Status**: Implemented locally (local Full PASS on `run-ab4ac058-718f-4e78-add8-b3d3eb97f772`); live CI `PENDING` until a real Actions run exists after push; awaiting independent review.
 
 ## 2. Accepted Capabilities
 
@@ -22,18 +23,18 @@ Authoritative, evidence-backed summary of DX-OS engineering and governance state
 
 ## 3. Active Beads Issue
 
-- **Issue ID**: open_source-cab.5 (closed)
-- **Title**: Configure DX-OS OpenSpec, ADRs, and agent governance
-- **Status**: closed
+- **Issue ID**: open_source-cab.8 (in_progress)
+- **Title**: CI Security, Secret Scanning, and OSS Compliance
+- **Status**: in_progress
 - **Owner / Assignee**: ROYCE-8425
-- **Dependencies**: open_source-cab.4 (closed)
-- **Blocks**: open_source-cab.8 (BR001-R7)
+- **Dependencies**: open_source-cab.5 (closed)
+- **Blocks**: open_source-cab.6 (BR001-R8)
 
 ## 4. Current Blockers
 
-- **Operational Blockers**: None within active milestone R6.
+- **Operational Blockers**: Independent review and acceptance of BR001-R7; live CI run pending owner-authorized post-pass publication.
 - **Release Blockers**:
-  - CI security scanners (Gitleaks, Trivy, Syft, Grype) and CycloneDX SBOM validation pending in BR001-R7.
+  - Independent review and acceptance of BR001-R7 (CI security scanners, SBOM, and OSS inventory).
   - Final clean-clone verification and public repository ownership audit pending in BR001-R8.
 
 ## 5. Accepted Architectural Decisions
@@ -49,14 +50,15 @@ Authoritative, evidence-backed summary of DX-OS engineering and governance state
 ## 6. Known Debt
 
 - **Browser/UI E2E Suite**: UI E2E tests are explicitly marked N/A during bootstrap remediation because UI frontend components are not yet built.
-- **Security Scanners in Quality Gate**: Automated Gitleaks, Trivy, Syft, and Grype scanner canaries and SBOM gates are scheduled for implementation in BR001-R7.
+- **Security Scanners in Quality Gate**: Gitleaks, Trivy, Syft, and Grype scanner canaries, SBOM gates, and OSS compliance verifiers are implemented locally (Full gate PASS); live GitHub Actions execution and independent review pending.
 - **Business Work**: Marketing automation and business workflow features have not started; all work to date is foundational infrastructure.
 
 ## 7. Next Task
 
-- **Next Workstream**: BR001-R7 (CI Security and OSS Compliance)
-- **Beads Issue**: open_source-cab.8
-- **Prerequisite**: Independent Codex PASS verdict on open_source-cab.5 and closure of R6.
+- **Active Workstream**: BR001-R7 (CI Security and OSS Compliance - Awaiting Independent Review)
+- **Next Workstream**: BR001-R8 (Clean Clone & Public Audits)
+- **Beads Issue**: open_source-cab.6 (BR001-R8)
+- **Prerequisite**: Independent review PASS verdict on open_source-cab.8 and closure of R7.
 
 ## 8. Demo Readiness
 
@@ -73,8 +75,8 @@ Authoritative, evidence-backed summary of DX-OS engineering and governance state
   - [x] PostgreSQL & Elsa NuGet runtime integration (R4)
   - [x] Unit, architecture, and Testcontainers integration test suites (R5)
   - [x] Agent governance, constitution, and project memory ratified (R6)
-  - [ ] CI pipeline, Gitleaks, Trivy, Syft, Grype security gates, and SBOM (R7 - pending)
-  - [ ] Clean-clone re-audit from public remote (R8 - pending)
+  - [ ] CI pipeline, Gitleaks, Trivy, Syft, Grype security gates, and SBOM (R7 - implemented locally, awaiting independent review)
+  - [ ] Clean-clone re-audit from public remote (R8 - not started)
   - [ ] Business product features (Gated until CLEAN CLONE / READY audit PASS)
 
 ## 10. Risks
@@ -92,3 +94,4 @@ Authoritative, evidence-backed summary of DX-OS engineering and governance state
 - [R4 Implementation Report](../artifacts/task-runs/open_source-cab.3/implementation-report.md) | [R4 Review](../artifacts/task-runs/open_source-cab.3/review.md)
 - [R5 Implementation Report](../artifacts/task-runs/open_source-cab.4/implementation-report.md) | [R5 Review](../artifacts/task-runs/open_source-cab.4/review.md)
 - [R6 Implementation Report](../artifacts/task-runs/open_source-cab.5/implementation-report.md) | [R6 Verification](../artifacts/task-runs/open_source-cab.5/verification.md) | [R6 Review](../artifacts/task-runs/open_source-cab.5/review.md)
+- [R7 Implementation Report](../artifacts/task-runs/open_source-cab.8/implementation-report.md) | [R7 Verification](../artifacts/task-runs/open_source-cab.8/verification.md)

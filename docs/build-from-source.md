@@ -23,7 +23,9 @@ This document provides complete, reproducible instructions for building DX-OS fr
 
 ## Step-by-Step Build Instructions
 
-### 1. Clone the Clean Repository
+### 1. Clone the Official Repository
+
+This GitHub repository name is `open_source`; the project is DX-OS:
 
 ```bash
 git clone https://github.com/ROYCE-8425/open_source.git dx-os

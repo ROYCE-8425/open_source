@@ -28,7 +28,7 @@ All contributors are expected to adhere to our [Code of Conduct](CODE_OF_CONDUCT
 
 ### Fork & Branch Workflow
 
-1. Fork the repository on GitHub: `https://github.com/ROYCE-8425/open_source`
+1. Fork the official repository on GitHub: `https://github.com/ROYCE-8425/open_source` (this GitHub repository name is `open_source`; the project is DX-OS).
 2. Clone your fork locally:
    ```bash
    git clone https://github.com/<your-username>/open_source.git dx-os
@@ -81,4 +81,4 @@ For significant architectural changes, additions of new dependencies, or changes
 
 ## Questions and Support
 
-Have questions? Feel free to open a [GitHub Discussion](https://github.com/ROYCE-8425/open_source/discussions) or reach out via [SUPPORT.md](SUPPORT.md).
+Have questions? Feel free to reach out via [SUPPORT.md](SUPPORT.md) or open a discussion once community forums are enabled on the public remote.

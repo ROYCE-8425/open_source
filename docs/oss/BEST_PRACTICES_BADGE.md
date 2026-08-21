@@ -19,7 +19,7 @@ This document outlines the self-certification readiness of DX-OS for the **OpenS
 
 | Criterion | Status | Implementation Details |
 | :--- | :---: | :--- |
-| **Public Version-Controlled Source** | **MET** | Public Git repository on GitHub at `https://github.com/ROYCE-8425/open_source`. |
+| **Public Version-Controlled Source** | **MET** | Public Git repository on GitHub at `https://github.com/ROYCE-8425/open_source` (DX-OS). |
 | **Unique Version Numbering** | **MET** | Semantic Versioning (SemVer 2.0.0) tracked in `CHANGELOG.md` and release tags. |
 | **Release Notes / Changelog** | **MET** | Detailed changelog maintained in `CHANGELOG.md` following Keep a Changelog standard. |
 
