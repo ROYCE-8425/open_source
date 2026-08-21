@@ -48,13 +48,20 @@ Temporary headers: `X-DXOS-Role` (`Owner` / `Marketer` / `Content` / `Sales` / `
 
 - `POST /campaigns` — create `Draft` (AI stub copy)
 - `POST /campaigns/{id}/submit-review` — Marketer: `Draft` → `PendingReview` → `PendingApproval`
+- `POST /campaigns/{id}/send-to-owner` — Marketer: `Draft` → `PendingApproval`
 - `POST /campaigns/{id}/approve` — Owner only, `PendingApproval` → `Published` (does **not** push ads)
 - `POST /campaigns/{id}/reject` — Owner or Marketer
-- `GET /campaigns/{id}`
-- `POST /leads/webhook` — Form lead `{ name, phone, email, campaignId? }`
-- `GET /leads` — list; unclaims Sales after 15-minute SLA
-- `POST /leads/{id}/claim` — Sales
-- `GET /dashboard/cpl?spend=` — manual spend (default 0) + lead count + CPL
+- `GET /campaigns` — list campaigns
+- `GET /campaigns/{id}` — get single campaign
+- `POST /campaigns/{id}/traffic` — executes `TrafficIngestWorkflow` (Elsa 3) to record impressions, clicks, visits, spend
+- `GET /campaigns/{id}/traffic` — list snapshots + aggregate totals (impressions, clicks, visits, spend, CTR)
+- `POST /leads/webhook` — Form lead `{ name, phone, email, campaignId? }` (score 80)
+- `POST /leads/message` — Message lead `{ name, phone, email, campaignId? }` (score 50)
+- `POST /leads/call` — Call lead `{ name, phone, email, campaignId? }` (score 50)
+- `GET /leads` — list leads with remaining SLA seconds
+- `POST /leads/{id}/claim` — Sales claim
+- `POST /demo/seed` — seed demo campaigns and leads
+- `GET /dashboard/cpl?spend=&dailySpend=&budget=` — CPL dashboard using stored spend (or optional query override)
 
 `NOT_READY`: no Facebook/TikTok/Google Ads live, no Zalo OA inbox, no A/B CTR, no revenue/accounting UI.
 

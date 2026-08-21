@@ -1,73 +1,103 @@
 # DX-OS — hệ thống thiết kế bảng điều hành
 
-Nguồn hình ảnh: không gian làm việc B2B (Asana) — **bình tĩnh, vận hành, không “AI console”**.  
-Giao diện vận hành: **tiếng Việt**. Tiền tệ: **VND (đồng)**.  
-Font mã nguồn mở hỗ trợ tiếng Việt: **Be Vietnam Pro**. Không dùng TWK Lausanne (không phải font OSS).
+Nguồn: copy token và không khí từ **Học cùng Royce** (`study.trannhuy.online`, repo `ROYCE-8425/hoc-cung-royce`, branch `chore/olp-foss-readiness`).
 
-Áp dụng cho `src/DXOS.Api/wwwroot/` và mọi UI cùng origin với API.
+File gốc không có `DESIGN.md`. Token dưới đây lấy từ:
+
+- `frontend/src/index.css` (`:root` HSL)
+- `frontend/tailwind.config.js` (Inter, radius, shadcn)
+- Trang live: CTA emerald, lưới nền trắng, logo não tím
+
+Sản phẩm vẫn là **DX-OS** (Lead → CPL). Logo Học cùng Royce được dùng làm mark trên thanh nav vì chủ DN yêu cầu giao diện **thật giống** site đó. Giao diện vận hành: **tiếng Việt**. Tiền: **VND**.
+
+Áp dụng cho `src/DXOS.Api/wwwroot/`.
 
 ---
 
 ## 1. Không khí
 
-DX-OS là **bảng điều hành quy trình** (chiến dịch → duyệt → lead → chi phí/lead), không phải sản phẩm “agent”.
+SaaS sáng, sạch, Tailwind-like — không Asana xám, không terminal, không neon cyber.
 
-- Nền trắng, chữ gần đen, xám ấm cho nút.
-- Không gradient tím/cyan, không neon, không terminal giả.
-- Phân tầng bằng **khoảng trắng + độ đậm chữ**, không bằng màu bão hòa.
+- Nền mint rất nhạt + **lưới 48px** + halo emerald trên đầu trang.
+- CTA **emerald** (`#059669` → `#047857`).
+- Phần Elsa / workflow dùng accent **tím** (cùng vai trò “AI” trên site gốc).
+- Nút **pill** (bo tròn 9999px), shadow mềm.
+- Logo: `wwwroot/logos/hoc-cung-royce-logo.png` + chữ DX-OS.
 
-## 2. Token
+## 2. Token (copy từ `frontend/src/index.css`)
 
 ```yaml
+source: "https://study.trannhuy.online/"
+sourceRepo: "https://github.com/ROYCE-8425/hoc-cung-royce"
+sourceFile: "frontend/src/index.css"
+
 locale: vi-VN
 currency: VND
 currencyDisplay: "1.500.000 ₫"
 
-colors:
-  primary: "#646f79"
-  on-primary: "#ffffff"
-  background: "#ffffff"
-  surface: "#f3f3f3"
-  border: "#e8e8e8"
-  text: "#0d0d0d"
-  text-muted: "#5c6370"
-  accent: "#0d0e10"
-  danger: "#b42318"
-  warning: "#b54708"
-  ok: "#027a48"
+# HSL triplets — nguyên văn :root Học cùng Royce
+hsl:
+  background: "150 30% 99%"      # #f7fcf9 mint-white
+  foreground: "150 20% 10%"
+  card: "0 0% 100%"
+  primary: "152 69% 40%"         # ≈ #20ac6b
+  primaryForeground: "0 0% 100%"
+  secondary: "210 40% 96.1%"
+  muted: "210 40% 96.1%"
+  mutedForeground: "215.4 16.3% 46.9%"
+  destructive: "0 84.2% 60.2%"
+  border: "214.3 31.8% 91.4%"
+  ring: "152 69% 40%"
+  radius: "0.5rem"
+
+# Hex CTA như nhìn thấy trên landing (Tailwind emerald)
+cta:
+  primary: "#059669"
+  primaryHover: "#047857"
+  primaryDeep: "#065f46"
+
+aiAccent:
+  violet: "#7c3aed"
+  violetSoft: "#f5f3ff"
+  usage: "Elsa workflow, PendingApproval, badge kỹ thuật — không dùng cho nút chính"
 
 typography:
-  fontFamily: "Be Vietnam Pro, Segoe UI, Noto Sans, sans-serif"
-  display: { size: 30px, weight: 500, lineHeight: 1.2 }
-  heading: { size: 20px, weight: 600, lineHeight: 1.3 }
-  body: { size: 16px, weight: 400, lineHeight: 1.5 }
-  label: { size: 12px, weight: 600, lineHeight: 1.4 }
+  fontFamily: "Inter, system-ui, sans-serif"
+  display: { size: 30px, weight: 800, letterSpacing: "-0.04em" }
+  heading: { size: 17px, weight: 600 }
+  body: { size: 15px, weight: 400, lineHeight: 1.5 }
+  label: { size: 12px, weight: 600 }
 
 spacing:
   base: 8px
   scale: [8, 12, 16, 24, 32, 48]
 
 radius:
-  sm: 4px
-  md: 8px
+  sm: "calc(0.5rem - 4px)"
+  md: "0.5rem"
   lg: 16px
+  pill: 9999px
 
 shadow:
-  card: "0 2px 8px rgba(0,0,0,0.08)"
+  sm: "0 1px 2px rgba(15,23,42,0.05)"
+  card: "0 4px 16px rgba(15,23,42,0.06)"
+  cta: "0 8px 20px hsl(152 69% 40% / 0.28)"
 
-motion:
-  fast: 100ms
-  base: 200ms
-  easing: ease-in-out
+utilitiesCopied:
+  gradientPrimary: "linear-gradient(135deg, hsl(primary) 0%, hsl(primary / 0.8) 100%)"
+  gradientText: "linear-gradient(135deg, hsl(152 69% 40%) 0%, hsl(160 84% 39%) 100%)"
+  glass: "background hsl(background / 0.8) + backdrop-filter blur(12px)"
+  grid: "48px line grid + radial emerald/violet wash"
 ```
 
-Nút chính: nền `#646f79`, chữ trắng, cao tối thiểu 44px.  
-Ô nhập: viền `#e8e8e8`, focus viền `#646f79` 2px.  
-Thẻ: nền trắng, viền mềm, bán kính 8px.
+Nút chính: gradient `#059669` → `#047857`, chữ trắng, pill, cao ≥ 40px.  
+Ô nhập: viền `hsl(214.3 31.8% 91.4%)`, focus ring emerald 3px.  
+Thẻ: nền trắng 92% opacity, bán kính 16px, shadow mềm.  
+Nav: sticky glass.
 
 ## 3. Ngôn ngữ & tiền
 
-| Khái niệm API (giữ tiếng Anh trong JSON) | Hiển thị UI |
+| Khái niệm API | Hiển thị UI |
 |---|---|
 | Draft | Nháp |
 | PendingReview | Chờ chuyên viên |
@@ -80,21 +110,23 @@ Thẻ: nền trắng, viền mềm, bán kính 8px.
 | System | Hệ thống |
 | NOT_READY | CHƯA SẴN SÀNG PHÁT HÀNH |
 | spend / CPL | Chi phí quảng cáo / Chi phí trên mỗi lead (₫) |
+| traffic | Lưu lượng |
 
 Định dạng số: `Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 })`.
 
 ## 4. Bố cục một trang
 
-1. Thanh trạng thái vận hành (sức khỏe API + CSDL).  
-2. Chọn vai trò vận hành (không gọi “AI actor”).  
-3. Cột quy trình chiến dịch (luồng duyệt).  
-4. Cột tiếp nhận lead + nhận lead.  
-5. Chỉ số chi phí / lead.  
-6. Nhật ký thao tác (văn bản thường, không giả terminal).
+1. Nav sticky: logo Học cùng Royce + DX-OS + probe API/CSDL.  
+2. Banner chưa sẵn sàng phát hành (emerald, không đỏ báo động).  
+3. Chọn vai trò vận hành.  
+4. Lưới 2 cột: chiến dịch · lưu lượng Elsa.  
+5. Lưới 2 cột: lead · CPL/pacing.  
+6. Nhật ký thao tác — panel xám nhạt, **không** giả terminal.
 
 ## 5. Cấm trên UI này
 
-- Gradient “AI”, icon robot, chữ Operator Console kiểu cyber.
 - USD, `$`, `Ad Spend ($)`.
-- Copy marketing tiếng Anh trên nút/nhãn.
+- Copy marketing tiếng Anh trên nút/nhãn vận hành.
 - Tuyên bố ads đang chạy (`adsLive` luôn hiện **Chưa kết nối sàn quảng cáo**).
+- Terminal đen, neon cyan, robot “AI console”.
+- Đổi tên sản phẩm thành Học cùng Royce (chỉ **mượn** visual + logo mark).
