@@ -1,3 +1,4 @@
+using System.Text.Json;
 using DXOS.Application;
 using DXOS.Domain;
 using DXOS.Infrastructure.Persistence.Entities;
@@ -26,6 +27,36 @@ public sealed class LeadStore : ILeadStore
         return record is null ? null : ToDomain(record);
     }
 
+    public async Task<Lead?> FindByPhoneOrEmailAsync(string? phone, string? email, CancellationToken cancellationToken)
+    {
+        var hasPhone = !string.IsNullOrWhiteSpace(phone);
+        var hasEmail = !string.IsNullOrWhiteSpace(email);
+
+        if (!hasPhone && !hasEmail)
+        {
+            return null;
+        }
+
+        LeadRecord? record = null;
+        if (hasPhone && hasEmail)
+        {
+            record = await _db.Leads.AsNoTracking()
+                .FirstOrDefaultAsync(l => l.Phone == phone || l.Email == email, cancellationToken);
+        }
+        else if (hasPhone)
+        {
+            record = await _db.Leads.AsNoTracking()
+                .FirstOrDefaultAsync(l => l.Phone == phone, cancellationToken);
+        }
+        else
+        {
+            record = await _db.Leads.AsNoTracking()
+                .FirstOrDefaultAsync(l => l.Email == email, cancellationToken);
+        }
+
+        return record is null ? null : ToDomain(record);
+    }
+
     public async Task<IReadOnlyList<Lead>> ListAsync(CancellationToken cancellationToken)
     {
         var records = await _db.Leads.AsNoTracking().OrderBy(l => l.CreatedAtUtc).ToListAsync(cancellationToken);
@@ -40,13 +71,20 @@ public sealed class LeadStore : ILeadStore
         record.Phone = lead.Phone;
         record.Email = lead.Email;
         record.Source = lead.Source.ToString();
+        record.SourcesJson = JsonSerializer.Serialize(lead.Sources.Select(s => s.ToString()));
         record.Score = lead.Score;
+        record.Label = lead.Label.ToString();
+        record.ScoreBreakdownJson = JsonSerializer.Serialize(lead.Breakdown);
+        record.ReasonsJson = JsonSerializer.Serialize(lead.Reasons);
         record.CampaignId = lead.CampaignId;
         record.AssignedToActor = lead.AssignedToActor;
         record.AssignedAtUtc = lead.AssignedAtUtc;
         record.ClaimedByActor = lead.ClaimedByActor;
         record.ClaimedAtUtc = lead.ClaimedAtUtc;
+        record.RejectedByActorsJson = JsonSerializer.Serialize(lead.RejectedByActors);
+        record.LastRejectionReason = lead.LastRejectionReason;
         record.CreatedAtUtc = lead.CreatedAtUtc;
+        record.UpdatedAtUtc = lead.UpdatedAtUtc;
         await _db.SaveChangesAsync(cancellationToken);
     }
 
@@ -124,30 +162,72 @@ public sealed class LeadStore : ILeadStore
             Phone = lead.Phone,
             Email = lead.Email,
             Source = lead.Source.ToString(),
+            SourcesJson = JsonSerializer.Serialize(lead.Sources.Select(s => s.ToString())),
             Score = lead.Score,
+            Label = lead.Label.ToString(),
+            ScoreBreakdownJson = JsonSerializer.Serialize(lead.Breakdown),
+            ReasonsJson = JsonSerializer.Serialize(lead.Reasons),
             CampaignId = lead.CampaignId,
             AssignedToActor = lead.AssignedToActor,
             AssignedAtUtc = lead.AssignedAtUtc,
             ClaimedByActor = lead.ClaimedByActor,
             ClaimedAtUtc = lead.ClaimedAtUtc,
-            CreatedAtUtc = lead.CreatedAtUtc
+            RejectedByActorsJson = JsonSerializer.Serialize(lead.RejectedByActors),
+            LastRejectionReason = lead.LastRejectionReason,
+            CreatedAtUtc = lead.CreatedAtUtc,
+            UpdatedAtUtc = lead.UpdatedAtUtc
         };
     }
 
     private static Lead ToDomain(LeadRecord record)
     {
+        var sources = string.IsNullOrWhiteSpace(record.SourcesJson)
+            ? [Enum.Parse<LeadSource>(record.Source)]
+            : JsonSerializer.Deserialize<List<string>>(record.SourcesJson)?
+                .Select(Enum.Parse<LeadSource>)
+                .ToList() ?? [Enum.Parse<LeadSource>(record.Source)];
+
+        var reasons = string.IsNullOrWhiteSpace(record.ReasonsJson)
+            ? new List<string>()
+            : JsonSerializer.Deserialize<List<string>>(record.ReasonsJson) ?? new List<string>();
+
+        var rejectedBy = string.IsNullOrWhiteSpace(record.RejectedByActorsJson)
+            ? new List<string>()
+            : JsonSerializer.Deserialize<List<string>>(record.RejectedByActorsJson) ?? new List<string>();
+
+        var breakdown = string.IsNullOrWhiteSpace(record.ScoreBreakdownJson)
+            ? new ScoreBreakdown(0, 0, 0, 0, 0, record.Score)
+            : JsonSerializer.Deserialize<ScoreBreakdown>(record.ScoreBreakdownJson) ?? new ScoreBreakdown(0, 0, 0, 0, 0, record.Score);
+
+        var label = Enum.TryParse<LeadLabel>(record.Label, out var parsedLabel)
+            ? parsedLabel
+            : record.Score switch
+            {
+                >= 80 => LeadLabel.Hot,
+                >= 50 => LeadLabel.Warm,
+                >= 20 => LeadLabel.Cold,
+                _ => LeadLabel.Junk
+            };
+
         return Lead.Restore(
             record.Id,
             record.Name,
             record.Phone,
             record.Email,
             Enum.Parse<LeadSource>(record.Source),
+            sources,
             record.Score,
+            label,
+            breakdown,
+            reasons,
             record.CampaignId,
             record.AssignedToActor,
             record.AssignedAtUtc,
             record.ClaimedByActor,
             record.ClaimedAtUtc,
-            record.CreatedAtUtc);
+            rejectedBy,
+            record.LastRejectionReason,
+            record.CreatedAtUtc,
+            record.UpdatedAtUtc == default ? record.CreatedAtUtc : record.UpdatedAtUtc);
     }
 }

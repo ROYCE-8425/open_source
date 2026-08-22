@@ -6,24 +6,40 @@ namespace DXOS.Unit.Tests;
 
 public sealed class LeadSlaTests
 {
-    private static readonly DateTimeOffset T0 = new(2026, 8, 21, 10, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset T0 = new(2026, 8, 21, 3, 0, 0, TimeSpan.Zero); // 10:00 AM VN
 
     [Fact]
-    public void Sla_IsFifteenMinutes()
+    public void Sla_Durations_HotIs5Min_WarmIs30Min()
     {
-        Assert.Equal(TimeSpan.FromMinutes(15), LeadSla.Duration);
-        Assert.False(LeadSla.IsExpired(T0, T0.AddMinutes(14)));
-        Assert.True(LeadSla.IsExpired(T0, T0.AddMinutes(15)));
+        Assert.Equal(TimeSpan.FromMinutes(5), LeadSla.HotDuration);
+        Assert.Equal(TimeSpan.FromMinutes(30), LeadSla.WarmDuration);
+        Assert.Null(LeadSla.GetDuration(LeadLabel.Cold));
+        Assert.Null(LeadSla.GetDuration(LeadLabel.Junk));
+    }
+
+    [Fact]
+    public void Sla_HotExpiresAfter5Minutes()
+    {
+        Assert.False(LeadSla.IsExpired(T0, T0.AddMinutes(4), LeadLabel.Hot));
+        Assert.True(LeadSla.IsExpired(T0, T0.AddMinutes(5), LeadLabel.Hot));
+    }
+
+    [Fact]
+    public void Sla_WarmExpiresAfter30Minutes()
+    {
+        Assert.False(LeadSla.IsExpired(T0, T0.AddMinutes(29), LeadLabel.Warm));
+        Assert.True(LeadSla.IsExpired(T0, T0.AddMinutes(30), LeadLabel.Warm));
     }
 
     [Fact]
     public void Claim_Unclaims_WhenSlaExpires()
     {
-        var lead = Lead.Intake("An", "0901", "a@x.vn", LeadSource.Form, null, "sales-a", T0);
+        var lead = Lead.Intake("Nguyen Van A muon hoc ngay", "0901234567", "a@x.vn", LeadSource.Form, Guid.NewGuid(), "sales-a", T0);
+        Assert.Equal(LeadLabel.Hot, lead.Label);
         lead.Claim(ActorRole.Sales, "sales-a", T0);
         Assert.Equal("sales-a", lead.ClaimedByActor);
 
-        var released = lead.ReleaseIfExpired(T0.AddMinutes(15));
+        var released = lead.ReleaseIfExpired(T0.AddMinutes(5));
         Assert.True(released);
         Assert.Null(lead.ClaimedByActor);
         Assert.Null(lead.AssignedToActor);
@@ -32,51 +48,63 @@ public sealed class LeadSlaTests
     [Fact]
     public void Claim_StaysActive_BeforeSla()
     {
-        var lead = Lead.Intake("An", "0901", null, LeadSource.Form, null, "sales-a", T0);
+        var lead = Lead.Intake("Nguyen Van A muon hoc ngay", "0901234567", "a@x.vn", LeadSource.Form, Guid.NewGuid(), "sales-a", T0);
         lead.Claim(ActorRole.Sales, "sales-a", T0);
-        Assert.False(lead.ReleaseIfExpired(T0.AddMinutes(14)));
+        Assert.False(lead.ReleaseIfExpired(T0.AddMinutes(4)));
         Assert.Equal("sales-a", lead.ClaimedByActor);
     }
 
     [Fact]
-    public void RoundRobin_RotatesSalesActors()
+    public void ColdOrJunk_Lead_NotAssignedToSales()
     {
-        var roster = new[] { "sales-a", "sales-b", "sales-c" };
-        Assert.Equal("sales-a", SalesRoundRobin.Next(roster, null));
-        Assert.Equal("sales-b", SalesRoundRobin.Next(roster, "sales-a"));
-        Assert.Equal("sales-c", SalesRoundRobin.Next(roster, "sales-b"));
-        Assert.Equal("sales-a", SalesRoundRobin.Next(roster, "sales-c"));
+        // Off hours, no contact, no campaign, call source -> Junk/Cold
+        var offHour = new DateTimeOffset(2026, 8, 21, 15, 0, 0, TimeSpan.Zero);
+        var lead = Lead.Intake("An", null, null, LeadSource.Call, null, "sales-a", offHour);
+        Assert.True(lead.Label is LeadLabel.Cold or LeadLabel.Junk);
+        Assert.Null(lead.AssignedToActor);
+        Assert.Null(lead.AssignedAtUtc);
     }
 
     [Fact]
     public void NonSales_CannotClaim()
     {
-        var lead = Lead.Intake("An", "0901", null, LeadSource.Form, null, null, T0);
+        var lead = Lead.Intake("An", "0901234567", "a@x.vn", LeadSource.Form, null, null, T0);
         var ex = Assert.Throws<DomainRuleException>(() => lead.Claim(ActorRole.Owner, "owner-1", T0));
         Assert.Equal("ForbiddenRole", ex.Code);
     }
 
     [Fact]
-    public async Task LeadService_RoundRobinAssignsThenUnclaimsAfterSla()
+    public void Sales_Reject_RequiresReason_AndReroutes()
+    {
+        var lead = Lead.Intake("Nguyen Van A can tu van", "0901234567", "a@x.vn", LeadSource.Form, Guid.NewGuid(), "sales-a", T0);
+        lead.Claim(ActorRole.Sales, "sales-a", T0);
+
+        var ex = Assert.Throws<DomainRuleException>(() => lead.Reject(ActorRole.Sales, "sales-a", "   ", "sales-b", T0));
+        Assert.Equal("InvalidReason", ex.Code);
+
+        lead.Reject(ActorRole.Sales, "sales-a", "Khach bao goi lai sau 1 tuan", "sales-b", T0);
+        Assert.Null(lead.ClaimedByActor);
+        Assert.Equal("sales-b", lead.AssignedToActor);
+        Assert.Equal("Khach bao goi lai sau 1 tuan", lead.LastRejectionReason);
+        Assert.Contains("sales-a", lead.RejectedByActors);
+    }
+
+    [Fact]
+    public async Task LeadService_Reject_ReroutesToAnotherSalesActor()
     {
         var clock = new MutableClock(T0);
-        var store = new InMemoryLeadStore(["sales-a", "sales-b"]);
+        var store = new InMemoryLeadStore(["sales-a", "sales-b", "sales-c"]);
         var service = new LeadService(store, clock);
 
-        var first = await service.IntakeFormAsync("An", "0901", "a@x.vn", null, CancellationToken.None);
-        var second = await service.IntakeFormAsync("Binh", "0902", null, null, CancellationToken.None);
-        Assert.Equal("sales-a", first.AssignedToActor);
-        Assert.Equal("sales-b", second.AssignedToActor);
-        Assert.Equal(80, first.Score);
-        Assert.Equal(50, second.Score);
+        var lead = await service.IntakeFormAsync("Khach Hang can mua", "0901234567", "a@x.vn", Guid.NewGuid(), CancellationToken.None);
+        Assert.Equal("sales-a", lead.AssignedToActor);
 
-        var claimed = await service.ClaimAsync(new ActorContext(ActorRole.Sales, "sales-a"), first.Id, CancellationToken.None);
-        Assert.Equal("sales-a", claimed.ClaimedByActor);
+        var rejected = await service.RejectAsync(new ActorContext(ActorRole.Sales, "sales-a"), lead.Id, "Khach o xa", CancellationToken.None);
+        Assert.Equal("sales-b", rejected.AssignedToActor);
+        Assert.Null(rejected.ClaimedByActor);
 
-        clock.UtcNow = T0.AddMinutes(15);
-        var listed = await service.ListAsync(CancellationToken.None);
-        var expired = listed.Single(l => l.Id == first.Id);
-        Assert.Null(expired.ClaimedByActor);
+        var rejected2 = await service.RejectAsync(new ActorContext(ActorRole.Sales, "sales-b"), lead.Id, "Khach doi y", CancellationToken.None);
+        Assert.Equal("sales-c", rejected2.AssignedToActor);
     }
 
     private sealed class MutableClock : IClock
@@ -103,6 +131,14 @@ public sealed class LeadSlaTests
         {
             _leads.TryGetValue(id, out var lead);
             return Task.FromResult(lead);
+        }
+
+        public Task<Lead?> FindByPhoneOrEmailAsync(string? phone, string? email, CancellationToken cancellationToken)
+        {
+            var match = _leads.Values.FirstOrDefault(l =>
+                (!string.IsNullOrWhiteSpace(phone) && l.Phone == phone) ||
+                (!string.IsNullOrWhiteSpace(email) && l.Email == email));
+            return Task.FromResult(match);
         }
 
         public Task<IReadOnlyList<Lead>> ListAsync(CancellationToken cancellationToken)

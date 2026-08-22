@@ -15,12 +15,14 @@ public sealed class CampaignStateMachineTests
 
         campaign.SubmitReview(ActorRole.Marketer, Now);
         Assert.Equal(CampaignStatus.PendingReview, campaign.Status);
+        Assert.Equal("copy", campaign.CopySnapshot);
 
         campaign.SubmitReview(ActorRole.Marketer, Now);
         Assert.Equal(CampaignStatus.PendingApproval, campaign.Status);
 
         campaign.Approve(ActorRole.Owner, Now);
         Assert.Equal(CampaignStatus.Published, campaign.Status);
+        Assert.Equal(Now, campaign.ApprovedAtUtc);
     }
 
     [Fact]
@@ -58,6 +60,7 @@ public sealed class CampaignStateMachineTests
         Assert.True(Campaign.IsAllowed(CampaignStatus.Draft, CampaignStatus.PendingReview));
         Assert.True(Campaign.IsAllowed(CampaignStatus.PendingReview, CampaignStatus.PendingApproval));
         Assert.True(Campaign.IsAllowed(CampaignStatus.PendingApproval, CampaignStatus.Published));
+        Assert.True(Campaign.IsAllowed(CampaignStatus.Published, CampaignStatus.PendingApproval));
     }
 
     [Fact]
@@ -82,14 +85,81 @@ public sealed class CampaignStateMachineTests
     }
 
     [Fact]
-    public void Reject_FromReviewOrApproval_IsTerminal()
+    public void Reject_WithReason_FromReviewOrApproval_IsTerminal()
     {
         var campaign = Campaign.CreateDraft("topic", "copy", "mai", Now);
         campaign.SubmitReview(ActorRole.Marketer, Now);
-        campaign.Reject(ActorRole.Marketer, Now);
+        campaign.Reject(ActorRole.Marketer, "Chưa đạt tiêu chuẩn thông điệp", Now);
         Assert.Equal(CampaignStatus.Rejected, campaign.Status);
+        Assert.Equal("Chưa đạt tiêu chuẩn thông điệp", campaign.RejectionReason);
 
         var ex = Assert.Throws<DomainRuleException>(() => campaign.Approve(ActorRole.Owner, Now));
         Assert.Equal("TerminalState", ex.Code);
+    }
+
+    [Fact]
+    public void Reject_MissingReason_ThrowsInvalidReason()
+    {
+        var campaign = Campaign.CreateDraft("topic", "copy", "mai", Now);
+        campaign.SubmitReview(ActorRole.Marketer, Now);
+        var ex = Assert.Throws<DomainRuleException>(() => campaign.Reject(ActorRole.Marketer, "   ", Now));
+        Assert.Equal("InvalidReason", ex.Code);
+        Assert.Equal(CampaignStatus.PendingReview, campaign.Status);
+    }
+
+    [Fact]
+    public void UndoApproval_Within15Minutes_RevertsToPendingApproval()
+    {
+        var campaign = Campaign.CreateDraft("topic", "copy", "mai", Now);
+        campaign.SendToOwner(ActorRole.Marketer, Now);
+        campaign.Approve(ActorRole.Owner, Now);
+        Assert.Equal(CampaignStatus.Published, campaign.Status);
+
+        campaign.UndoApproval(ActorRole.Owner, Now.AddMinutes(14));
+        Assert.Equal(CampaignStatus.PendingApproval, campaign.Status);
+        Assert.Null(campaign.ApprovedAtUtc);
+    }
+
+    [Fact]
+    public void UndoApproval_After15Minutes_ThrowsUndoWindowExpired()
+    {
+        var campaign = Campaign.CreateDraft("topic", "copy", "mai", Now);
+        campaign.SendToOwner(ActorRole.Marketer, Now);
+        campaign.Approve(ActorRole.Owner, Now);
+
+        var ex = Assert.Throws<DomainRuleException>(() => campaign.UndoApproval(ActorRole.Owner, Now.AddMinutes(15).AddSeconds(1)));
+        Assert.Equal("UndoWindowExpired", ex.Code);
+        Assert.Equal(CampaignStatus.Published, campaign.Status);
+    }
+
+    [Fact]
+    public void UndoApproval_NonOwner_ThrowsForbiddenRole()
+    {
+        var campaign = Campaign.CreateDraft("topic", "copy", "mai", Now);
+        campaign.SendToOwner(ActorRole.Marketer, Now);
+        campaign.Approve(ActorRole.Owner, Now);
+
+        var ex = Assert.Throws<DomainRuleException>(() => campaign.UndoApproval(ActorRole.Marketer, Now.AddMinutes(5)));
+        Assert.Equal("ForbiddenRole", ex.Code);
+    }
+
+    [Fact]
+    public void ModifyCopy_AfterSubmission_ThrowsInvalidTransition()
+    {
+        var campaign = Campaign.CreateDraft("topic", "initial copy", "mai", Now);
+        campaign.SubmitReview(ActorRole.Marketer, Now);
+
+        var ex = Assert.Throws<DomainRuleException>(() => campaign.UpdateCopy("new modified copy", Now));
+        Assert.Equal("InvalidTransition", ex.Code);
+        Assert.Equal("initial copy", campaign.Copy);
+    }
+
+    [Fact]
+    public void SubmitReview_WithBrandProhibitedTerm_ThrowsBrandBlocked()
+    {
+        var campaign = Campaign.CreateDraft("topic", "Quảng cáo cam kết 100% hiệu quả", "mai", Now);
+        var ex = Assert.Throws<DomainRuleException>(() => campaign.SubmitReview(ActorRole.Marketer, Now));
+        Assert.Equal("BrandBlocked", ex.Code);
+        Assert.Equal(CampaignStatus.Draft, campaign.Status);
     }
 }

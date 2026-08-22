@@ -56,11 +56,25 @@ public sealed class CampaignService
         return campaign;
     }
 
-    public async Task<Campaign> RejectAsync(ActorContext actor, Guid campaignId, CancellationToken cancellationToken)
+    public async Task<Campaign> UndoApprovalAsync(ActorContext actor, Guid campaignId, CancellationToken cancellationToken)
     {
         EnsureActor(actor);
         var campaign = await GetRequiredAsync(campaignId, cancellationToken);
-        campaign.Reject(actor.Role, _clock.UtcNow);
+        campaign.UndoApproval(actor.Role, _clock.UtcNow);
+        await _store.UpdateAsync(campaign, cancellationToken);
+        return campaign;
+    }
+
+    public async Task<Campaign> RejectAsync(ActorContext actor, Guid campaignId, string? reason, CancellationToken cancellationToken)
+    {
+        EnsureActor(actor);
+        var campaign = await GetRequiredAsync(campaignId, cancellationToken);
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            throw new DomainRuleException("InvalidReason", "Lý do từ chối chiến dịch là bắt buộc.");
+        }
+
+        campaign.Reject(actor.Role, reason, _clock.UtcNow);
         await _store.UpdateAsync(campaign, cancellationToken);
         return campaign;
     }

@@ -41,7 +41,10 @@ public sealed class CampaignStore : ICampaignStore
             ?? throw new InvalidOperationException($"Campaign '{campaign.Id}' was not found.");
         record.Topic = campaign.Topic;
         record.Copy = campaign.Copy;
+        record.CopySnapshot = campaign.CopySnapshot;
         record.Status = campaign.Status.ToString();
+        record.RejectionReason = campaign.RejectionReason;
+        record.ApprovedAtUtc = campaign.ApprovedAtUtc;
         record.CreatedByActor = campaign.CreatedByActor;
         record.CreatedAtUtc = campaign.CreatedAtUtc;
         record.UpdatedAtUtc = campaign.UpdatedAtUtc;
@@ -55,7 +58,10 @@ public sealed class CampaignStore : ICampaignStore
             Id = campaign.Id,
             Topic = campaign.Topic,
             Copy = campaign.Copy,
+            CopySnapshot = campaign.CopySnapshot,
             Status = campaign.Status.ToString(),
+            RejectionReason = campaign.RejectionReason,
+            ApprovedAtUtc = campaign.ApprovedAtUtc,
             CreatedByActor = campaign.CreatedByActor,
             CreatedAtUtc = campaign.CreatedAtUtc,
             UpdatedAtUtc = campaign.UpdatedAtUtc
@@ -68,7 +74,10 @@ public sealed class CampaignStore : ICampaignStore
             record.Id,
             record.Topic,
             record.Copy,
+            record.CopySnapshot,
             Enum.Parse<CampaignStatus>(record.Status),
+            record.RejectionReason,
+            record.ApprovedAtUtc,
             record.CreatedByActor,
             record.CreatedAtUtc,
             record.UpdatedAtUtc);

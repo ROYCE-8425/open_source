@@ -6,6 +6,7 @@ public interface ILeadStore
 {
     Task AddAsync(Lead lead, CancellationToken cancellationToken);
     Task<Lead?> GetAsync(Guid id, CancellationToken cancellationToken);
+    Task<Lead?> FindByPhoneOrEmailAsync(string? phone, string? email, CancellationToken cancellationToken);
     Task<IReadOnlyList<Lead>> ListAsync(CancellationToken cancellationToken);
     Task UpdateAsync(Lead lead, CancellationToken cancellationToken);
     Task<int> CountAsync(CancellationToken cancellationToken);

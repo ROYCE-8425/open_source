@@ -20,6 +20,14 @@ public sealed class CplStoredSpendTests
             return Task.FromResult(Leads.FirstOrDefault(l => l.Id == id));
         }
 
+        public Task<Lead?> FindByPhoneOrEmailAsync(string? phone, string? email, CancellationToken cancellationToken)
+        {
+            var match = Leads.FirstOrDefault(l =>
+                (!string.IsNullOrWhiteSpace(phone) && l.Phone == phone) ||
+                (!string.IsNullOrWhiteSpace(email) && l.Email == email));
+            return Task.FromResult(match);
+        }
+
         public Task<IReadOnlyList<Lead>> ListAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult<IReadOnlyList<Lead>>(Leads);

@@ -9,7 +9,10 @@ public sealed class Campaign
     public Guid Id { get; private set; }
     public string Topic { get; private set; } = string.Empty;
     public string Copy { get; private set; } = string.Empty;
+    public string? CopySnapshot { get; private set; }
     public CampaignStatus Status { get; private set; }
+    public string? RejectionReason { get; private set; }
+    public DateTimeOffset? ApprovedAtUtc { get; private set; }
     public string CreatedByActor { get; private set; } = string.Empty;
     public DateTimeOffset CreatedAtUtc { get; private set; }
     public DateTimeOffset UpdatedAtUtc { get; private set; }
@@ -31,10 +34,38 @@ public sealed class Campaign
             Id = Guid.NewGuid(),
             Topic = topic.Trim(),
             Copy = copy ?? string.Empty,
+            CopySnapshot = null,
             Status = CampaignStatus.Draft,
             CreatedByActor = createdByActor.Trim(),
             CreatedAtUtc = nowUtc,
             UpdatedAtUtc = nowUtc
+        };
+    }
+
+    public static Campaign Restore(
+        Guid id,
+        string topic,
+        string copy,
+        string? copySnapshot,
+        CampaignStatus status,
+        string? rejectionReason,
+        DateTimeOffset? approvedAtUtc,
+        string createdByActor,
+        DateTimeOffset createdAtUtc,
+        DateTimeOffset updatedAtUtc)
+    {
+        return new Campaign
+        {
+            Id = id,
+            Topic = topic,
+            Copy = copy,
+            CopySnapshot = copySnapshot,
+            Status = status,
+            RejectionReason = rejectionReason,
+            ApprovedAtUtc = approvedAtUtc,
+            CreatedByActor = createdByActor,
+            CreatedAtUtc = createdAtUtc,
+            UpdatedAtUtc = updatedAtUtc
         };
     }
 
@@ -47,16 +78,18 @@ public sealed class Campaign
         DateTimeOffset createdAtUtc,
         DateTimeOffset updatedAtUtc)
     {
-        return new Campaign
+        return Restore(id, topic, copy, null, status, null, null, createdByActor, createdAtUtc, updatedAtUtc);
+    }
+
+    public void UpdateCopy(string newCopy, DateTimeOffset nowUtc)
+    {
+        if (Status != CampaignStatus.Draft)
         {
-            Id = id,
-            Topic = topic,
-            Copy = copy,
-            Status = status,
-            CreatedByActor = createdByActor,
-            CreatedAtUtc = createdAtUtc,
-            UpdatedAtUtc = updatedAtUtc
-        };
+            throw new DomainRuleException("InvalidTransition", "Cannot modify copy after submission. Must create a new draft.");
+        }
+
+        Copy = newCopy ?? string.Empty;
+        UpdatedAtUtc = nowUtc;
     }
 
     public void SubmitReview(ActorRole role, DateTimeOffset nowUtc)
@@ -66,6 +99,9 @@ public sealed class Campaign
         {
             throw new DomainRuleException("ForbiddenRole", "Only Marketer can submit a campaign for review.");
         }
+
+        BrandLite.Validate(Copy);
+        CopySnapshot = Copy;
 
         var next = Status switch
         {
@@ -79,6 +115,14 @@ public sealed class Campaign
 
     public void SendToOwner(ActorRole role, DateTimeOffset nowUtc)
     {
+        if (role != ActorRole.Marketer)
+        {
+            throw new DomainRuleException("ForbiddenRole", "Only Marketer can send campaign to Owner.");
+        }
+
+        BrandLite.Validate(Copy);
+        CopySnapshot = Copy;
+
         if (Status == CampaignStatus.PendingApproval)
         {
             return;
@@ -114,10 +158,32 @@ public sealed class Campaign
             throw new DomainRuleException("InvalidTransition", $"Cannot approve from {Status}.");
         }
 
+        ApprovedAtUtc = nowUtc;
         TransitionTo(CampaignStatus.Published, nowUtc);
     }
 
-    public void Reject(ActorRole role, DateTimeOffset nowUtc)
+    public void UndoApproval(ActorRole role, DateTimeOffset nowUtc)
+    {
+        if (role != ActorRole.Owner)
+        {
+            throw new DomainRuleException("ForbiddenRole", "Only Owner can undo campaign approval.");
+        }
+
+        if (Status != CampaignStatus.Published)
+        {
+            throw new DomainRuleException("InvalidTransition", $"Cannot undo approval when campaign is {Status}.");
+        }
+
+        if (ApprovedAtUtc is null || nowUtc - ApprovedAtUtc.Value > TimeSpan.FromMinutes(15))
+        {
+            throw new DomainRuleException("UndoWindowExpired", "The 15-minute undo window has expired.");
+        }
+
+        ApprovedAtUtc = null;
+        TransitionTo(CampaignStatus.PendingApproval, nowUtc);
+    }
+
+    public void Reject(ActorRole role, string reason, DateTimeOffset nowUtc)
     {
         EnsureNotTerminal();
         if (role is not (ActorRole.Owner or ActorRole.Marketer))
@@ -130,7 +196,18 @@ public sealed class Campaign
             throw new DomainRuleException("InvalidTransition", $"Cannot reject from {Status}.");
         }
 
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            throw new DomainRuleException("InvalidReason", "Rejection reason is required.");
+        }
+
+        RejectionReason = reason.Trim();
         TransitionTo(CampaignStatus.Rejected, nowUtc);
+    }
+
+    public void Reject(ActorRole role, DateTimeOffset nowUtc)
+    {
+        Reject(role, "Từ chối không nêu lý do cụ thể", nowUtc);
     }
 
     private void EnsureNotTerminal()
@@ -161,6 +238,7 @@ public sealed class Campaign
             (CampaignStatus.PendingReview, CampaignStatus.Rejected) => true,
             (CampaignStatus.PendingApproval, CampaignStatus.Published) => true,
             (CampaignStatus.PendingApproval, CampaignStatus.Rejected) => true,
+            (CampaignStatus.Published, CampaignStatus.PendingApproval) => true,
             _ => false
         };
     }
