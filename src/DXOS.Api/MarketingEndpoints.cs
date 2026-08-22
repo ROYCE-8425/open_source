@@ -28,9 +28,19 @@ internal static class MarketingEndpoints
             return await ExecuteAsync(http, actor => campaigns.ApproveAsync(actor, id, cancellationToken));
         });
 
-        app.MapPost("/campaigns/{id:guid}/reject", async (Guid id, CampaignService campaigns, HttpContext http, CancellationToken cancellationToken) =>
+        app.MapPost("/campaigns/{id:guid}/undo", async (Guid id, CampaignService campaigns, HttpContext http, CancellationToken cancellationToken) =>
         {
-            return await ExecuteAsync(http, actor => campaigns.RejectAsync(actor, id, cancellationToken));
+            return await ExecuteAsync(http, actor => campaigns.UndoApprovalAsync(actor, id, cancellationToken));
+        });
+
+        app.MapPost("/campaigns/{id:guid}/reject", async (Guid id, RejectRequest request, CampaignService campaigns, HttpContext http, CancellationToken cancellationToken) =>
+        {
+            if (string.IsNullOrWhiteSpace(request?.Reason))
+            {
+                return Results.BadRequest(new { error = "Lý do từ chối chiến dịch là bắt buộc.", code = "InvalidReason" });
+            }
+
+            return await ExecuteAsync(http, actor => campaigns.RejectAsync(actor, id, request.Reason, cancellationToken));
         });
 
         app.MapGet("/campaigns/{id:guid}", async (Guid id, CampaignService campaigns, HttpContext http, CancellationToken cancellationToken) =>
@@ -245,6 +255,51 @@ internal static class MarketingEndpoints
             return await ExecuteAsync(http, actor => leads.ClaimAsync(actor, id, cancellationToken));
         });
 
+        app.MapPost("/leads/{id:guid}/reject", async (Guid id, RejectRequest request, LeadService leads, HttpContext http, CancellationToken cancellationToken) =>
+        {
+            if (string.IsNullOrWhiteSpace(request?.Reason))
+            {
+                return Results.BadRequest(new { error = "Lý do từ chối lead là bắt buộc.", code = "InvalidReason" });
+            }
+
+            return await ExecuteAsync(http, actor => leads.RejectAsync(actor, id, request.Reason, cancellationToken));
+        });
+
+        app.MapPost("/dashboard/spend-proposal", async (CreateSpendProposalRequest request, SpendProposalService proposals, HttpContext http, CancellationToken cancellationToken) =>
+        {
+            return await ExecuteAsync(http, actor => proposals.ProposeAsync(
+                actor,
+                request.FromNote ?? string.Empty,
+                request.ToNote ?? string.Empty,
+                request.Percent,
+                request.Rationale ?? string.Empty,
+                cancellationToken), ToSpendProposalResponse);
+        });
+
+        app.MapGet("/dashboard/spend-proposals", async (SpendProposalService proposals, HttpContext http, CancellationToken cancellationToken) =>
+        {
+            try
+            {
+                ReadActor(http);
+                var items = await proposals.ListAsync(cancellationToken);
+                return Results.Ok(items.Select(ToSpendProposalResponse).ToList());
+            }
+            catch (DomainRuleException ex)
+            {
+                return MapDomainException(ex);
+            }
+        });
+
+        app.MapPost("/dashboard/spend-proposal/{id:guid}/approve", async (Guid id, SpendProposalService proposals, HttpContext http, CancellationToken cancellationToken) =>
+        {
+            return await ExecuteAsync(http, actor => proposals.ApproveAsync(actor, id, cancellationToken), ToSpendProposalResponse);
+        });
+
+        app.MapPost("/dashboard/spend-proposal/{id:guid}/reject", async (Guid id, RejectRequest? request, SpendProposalService proposals, HttpContext http, CancellationToken cancellationToken) =>
+        {
+            return await ExecuteAsync(http, actor => proposals.RejectAsync(actor, id, request?.Reason, cancellationToken), ToSpendProposalResponse);
+        });
+
         app.MapGet("/dashboard/cpl", async (
             decimal? spend,
             decimal? dailySpend,
@@ -299,6 +354,11 @@ internal static class MarketingEndpoints
                 return Results.Ok(ToLeadResponse(lead, DateTimeOffset.UtcNow));
             }
 
+            if (result is SpendProposal proposal)
+            {
+                return Results.Ok(ToSpendProposalResponse(proposal));
+            }
+
             return Results.Ok(projector is null ? result : projector(result));
         }
         catch (DomainRuleException ex)
@@ -330,7 +390,8 @@ internal static class MarketingEndpoints
         {
             "NotFound" => Results.NotFound(new { error = ex.Message, code = ex.Code }),
             "ForbiddenRole" => Results.Json(new { error = ex.Message, code = ex.Code }, statusCode: StatusCodes.Status403Forbidden),
-            "AlreadyClaimed" or "InvalidTransition" or "TerminalState" => Results.Conflict(new { error = ex.Message, code = ex.Code }),
+            "AlreadyClaimed" or "InvalidTransition" or "TerminalState" or "BrandBlocked" or "UndoWindowExpired" =>
+                Results.Conflict(new { error = ex.Message, code = ex.Code }),
             _ => Results.BadRequest(new { error = ex.Message, code = ex.Code })
         };
     }
@@ -342,7 +403,10 @@ internal static class MarketingEndpoints
             id = campaign.Id,
             topic = campaign.Topic,
             copy = campaign.Copy,
+            copySnapshot = campaign.CopySnapshot,
             status = campaign.Status.ToString(),
+            rejectionReason = campaign.RejectionReason,
+            approvedAtUtc = campaign.ApprovedAtUtc,
             createdByActor = campaign.CreatedByActor,
             createdAtUtc = campaign.CreatedAtUtc,
             updatedAtUtc = campaign.UpdatedAtUtc,
@@ -359,16 +423,51 @@ internal static class MarketingEndpoints
             phone = lead.Phone,
             email = lead.Email,
             source = lead.Source.ToString(),
+            sources = lead.Sources.Select(s => s.ToString()).ToList(),
             score = lead.Score,
+            label = lead.Label.ToString(),
+            scoreBreakdown = new
+            {
+                behavior = lead.Breakdown.Behavior,
+                channel = lead.Breakdown.Channel,
+                campaign = lead.Breakdown.Campaign,
+                time = lead.Breakdown.Time,
+                intent = lead.Breakdown.Intent,
+                total = lead.Breakdown.Total
+            },
+            reasons = lead.Reasons,
             campaignId = lead.CampaignId,
             assignedToActor = lead.AssignedToActor,
             assignedAtUtc = lead.AssignedAtUtc,
             claimedByActor = lead.ClaimedByActor,
             claimedAtUtc = lead.ClaimedAtUtc,
+            rejectedByActors = lead.RejectedByActors,
+            lastRejectionReason = lead.LastRejectionReason,
             slaRemainingSeconds = lead.SlaRemainingSeconds(nowUtc),
             welcomeQueued = true,
             welcomeChannel = "hang-doi-noi-bo",
-            createdAtUtc = lead.CreatedAtUtc
+            createdAtUtc = lead.CreatedAtUtc,
+            updatedAtUtc = lead.UpdatedAtUtc
+        };
+    }
+
+    private static object ToSpendProposalResponse(SpendProposal proposal)
+    {
+        return new
+        {
+            id = proposal.Id,
+            fromNote = proposal.FromNote,
+            toNote = proposal.ToNote,
+            percent = proposal.Percent,
+            rationale = proposal.Rationale,
+            proposedByRole = proposal.ProposedByRole.ToString(),
+            proposedByActor = proposal.ProposedByActor,
+            status = proposal.Status,
+            rejectionReason = proposal.RejectionReason,
+            decidedByActor = proposal.DecidedByActor,
+            adsLive = false,
+            createdAtUtc = proposal.CreatedAtUtc,
+            decidedAtUtc = proposal.DecidedAtUtc
         };
     }
 
@@ -412,6 +511,14 @@ internal static class MarketingEndpoints
 }
 
 internal sealed record CreateCampaignRequest(string? Topic);
+
+internal sealed record RejectRequest(string? Reason);
+
+internal sealed record CreateSpendProposalRequest(
+    string? FromNote,
+    string? ToNote,
+    decimal Percent,
+    string? Rationale);
 
 internal sealed record FormLeadRequest(string? Name, string? Phone, string? Email, Guid? CampaignId);
 

@@ -28,10 +28,12 @@ builder.Services.AddSingleton<CampaignCopyStub>();
 builder.Services.AddScoped<ICampaignStore, CampaignStore>();
 builder.Services.AddScoped<ILeadStore, LeadStore>();
 builder.Services.AddScoped<ITrafficStore, TrafficStore>();
+builder.Services.AddScoped<ISpendProposalStore, SpendProposalStore>();
 builder.Services.AddScoped<CampaignService>();
 builder.Services.AddScoped<LeadService>();
 builder.Services.AddScoped<DemoSeedService>();
 builder.Services.AddScoped<TrafficService>();
+builder.Services.AddScoped<SpendProposalService>();
 
 // Health Checks
 builder.Services.AddHealthChecks()
